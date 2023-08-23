@@ -10,6 +10,8 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
 import * as s3Deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as opensearch from 'aws-cdk-lib/aws-opensearchservice';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 
 const region = process.env.CDK_DEFAULT_REGION;   
 const debug = false;
@@ -19,6 +21,9 @@ const projectName = `chatbot-varco-${region}`;
 const bucketName = `storage-for-${projectName}`;
 const endpoint_name = 'endpoint-varco-llm-ko-13b-ist-1';
 const varico_region = "us-west-2";  
+const rag_type = 'opensearch';  // faiss or opensearch
+const opensearch_account = "admin";
+const opensearch_passwd = "Wifi1234!";
 
 export class CdkVarcoOpensearchStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -78,6 +83,72 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
       sources: [s3Deploy.Source.asset("../html")],
       destinationBucket: s3Bucket,
     });
+
+    // Permission for OpenSearch
+    const domainName = `os-${projectName}`
+    const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+    const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+    if(debug) {
+      new cdk.CfnOutput(this, `resource-arn-for-${projectName}`, {
+        value: resourceArn,
+        description: 'The arn of resource',
+      }); 
+    }
+
+    const OpenSearchPolicy = new iam.PolicyStatement({  
+      resources: [resourceArn],      
+      actions: ['es:*'],
+    });  
+    const OpenSearchAccessPolicy = new iam.PolicyStatement({        
+      resources: [resourceArn],      
+      actions: ['es:*'],
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.AnyPrincipal()],      
+    });  
+
+    // OpenSearch
+    const domain = new opensearch.Domain(this, 'Domain', {
+      version: opensearch.EngineVersion.OPENSEARCH_2_3,
+      
+      domainName: domainName,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      enforceHttps: true,
+      fineGrainedAccessControl: {
+        masterUserName: opensearch_account,
+        // masterUserPassword: cdk.SecretValue.secretsManager('opensearch-private-key'),
+        masterUserPassword:cdk.SecretValue.unsafePlainText(opensearch_passwd)
+      },
+      capacity: {
+        masterNodes: 3,
+        masterNodeInstanceType: 'm6g.large.search',
+        // multiAzWithStandbyEnabled: false,
+        dataNodes: 3,
+        dataNodeInstanceType: 'r6g.large.search',        
+        // warmNodes: 2,
+        // warmInstanceType: 'ultrawarm1.medium.search',
+      },
+      accessPolicies: [OpenSearchAccessPolicy],      
+      ebs: {
+        volumeSize: 100,
+        volumeType: ec2.EbsDeviceVolumeType.GP3,
+      },
+      nodeToNodeEncryption: true,
+      encryptionAtRest: {
+        enabled: true,
+      },
+      zoneAwareness: {
+        enabled: true,
+        availabilityZoneCount: 3,        
+      }
+    });
+    new cdk.CfnOutput(this, `Domain-of-OpenSearch-for-${projectName}`, {
+      value: domain.domainArn,
+      description: 'The arm of OpenSearch Domain',
+    });
+    new cdk.CfnOutput(this, `Endpoint-of-OpenSearch-for-${projectName}`, {
+      value: 'https://'+domain.domainEndpoint,
+      description: 'The endpoint of OpenSearch Domain',
+    });
     
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -104,6 +175,11 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
     roleLambda.addManagedPolicy({
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
     });
+    roleLambda.attachInlinePolicy( // add opensearch policy
+      new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
+        statements: [OpenSearchPolicy],
+      }),
+    );
 
     // Lambda for chat 
     const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${projectName}`, {
@@ -118,7 +194,10 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
         s3_prefix: s3_prefix,
         callLogTableName: callLogTableName,
         varico_region: varico_region,
-        endpoint_name: endpoint_name
+        endpoint_name: endpoint_name,
+        rag_type: rag_type,
+        opensearch_account: opensearch_account,
+        opensearch_passwd: opensearch_passwd        
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  

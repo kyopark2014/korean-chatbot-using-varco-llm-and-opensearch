@@ -1,6 +1,10 @@
-# Varco LLM과 OpenSearch을 이용하여 간단한 한국어 Chatbot 구현하기
+# VARCO LLM을 이용하여 간단한 한국어 Chatbot 구현하기
 
-Varco LLM의 입력과 출력의 포맷을 맞추어서 아래와 같이 ContentHandler를 정의합니다. 
+여기서는 [VARCO LLM](https://ncsoft.github.io/ncresearch/varco-llm/)을 이용하여 LangChain 기반으로 한국어 Chatbot을 구현하고자 합니다. VARCO LLM은 엔씨소프트(NC SOFT)에서 제공하는 대용량 언어 모델(LLM)입니다. VARCO LLM KO-13B-IST는 VARCO LLM KO-13B-FM의 파인튜닝 모델로서 Question and Answering, Summarization등 다양한 태스크에 활용할 수 있습니다. VARCO LLM은 [Amazon SageMaker](https://aws.amazon.com/marketplace/seller-profile?id=seller-tkuvdeznmi2w4)를 이용하여 쉽게 배포하여 사용할 수 있습니다. 
+
+## LangChain과 연동하기 
+
+LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되므로 아래와 같이 VARCO LLM의 입력과 출력의 포맷을 맞추어서 ContentHandler를 정의합니다. 
 
 ```python
 class ContentHandler(LLMContentHandler):
@@ -18,7 +22,7 @@ class ContentHandler(LLMContentHandler):
         return response_json["result"][0]
 ```
 
-Varco LLM은 SageMaker endpoint를 이용하여 접근할 수 있습니다. 아래와 같이 ContentHandler를 이용하여 LangChain을 연결합니다.
+Varco LLM은 SageMaker endpoint를 이용하여 접근할 수 있습니다. 아래와 같이 ContentHandler를 이용하여 LangChain을 연결합니다. 
 
 ```python
 content_handler = ContentHandler()
@@ -39,6 +43,21 @@ llm = SagemakerEndpoint(
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
 )
+```
+
+VARCO LLM의 parameter는 아래와 같습니다.
+- request_output_len: 생성되는 최대 token의 수, 기본값은 1000입니다.
+- repetition_penalty: 반복을 제한하기 위한 파라미터로 1.0이면 no panalty입니다. 기본값은 1.3입니다.
+- temperature: 다음 token의 확율(probability)로서 기본값은 0.5입니다.
+
+Output은 Json 형태로 전달되며 기본 포맷은 아래와 같습니다.
+
+```java
+{
+  "result": [
+    "output text here"
+  ]
+}
 ```
 
 ## 문서 읽기
@@ -154,6 +173,11 @@ cdk destroy
 
 ## Reference
 
+[NC - github](https://ncsoft.github.io/ncresearch/varco-llm/)
+
+[Deploy Varco LLM Model 13B IST Package from AWS Marketplace](https://github.com/ncsoft/ncresearch/blob/main/notebooks/varco_model_13_IST.ipynb)
+
+### invode_endpoint API 사용 예제
 LangChain없이 API를 이용하여 아래와 같이 응답을 얻을 수 있습니다.
 
 ```python

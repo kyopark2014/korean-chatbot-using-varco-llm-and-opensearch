@@ -16,7 +16,6 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import CSVLoader
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain.retrievers import AmazonKendraRetriever
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -24,8 +23,6 @@ s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 endpoint_name = os.environ.get('endpoint_name')
 varico_region = os.environ.get('varico_region')
-kendraIndex = os.environ.get('kendraIndex')
-roleArn = os.environ.get('roleArn')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -59,30 +56,7 @@ llm = SagemakerEndpoint(
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
 )
-retriever = AmazonKendraRetriever(index_id=kendraIndex)
 
-# store document into Kendra
-def store_document(s3_file_name, requestId):
-    documentInfo = {
-        "S3Path": {
-            "Bucket": s3_bucket,
-            "Key": s3_prefix+'/'+s3_file_name
-        },
-        "Title": s3_file_name,
-        "Id": requestId
-    }
-
-    documents = [
-        documentInfo
-    ]
-
-    kendra = boto3.client("kendra")
-    result = kendra.batch_put_document(
-        Documents = documents,
-        IndexId = kendraIndex,
-        RoleArn = roleArn
-    )
-    print(result)
 
 # load documents from s3
 def load_document(file_type, s3_file_name):
@@ -199,8 +173,6 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, kendra
-
     start = int(time.time())    
 
     msg = ""
@@ -222,9 +194,6 @@ def lambda_handler(event, context):
             
     elif type == 'document':
         object = body
-
-        # stor the object into kendra
-        store_document(object, requestId)
         
         file_type = object[object.rfind('.')+1:len(object)]
         print('file_type: ', file_type)

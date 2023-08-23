@@ -16,6 +16,8 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import CSVLoader
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
+from langchain.vectorstores import OpenSearchVectorSearch
+from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -23,6 +25,10 @@ s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 endpoint_name = os.environ.get('endpoint_name')
 varico_region = os.environ.get('varico_region')
+opensearch_url = os.environ.get('opensearch_url')
+
+opensearch_account = os.environ.get('opensearch_account')
+opensearch_passwd = os.environ.get('opensearch_passwd')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -57,7 +63,6 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")
@@ -90,6 +95,14 @@ def load_document(file_type, s3_file_name):
             
     return texts
 
+def get_answer_using_query(query, vectorstore, rag_type):
+    wrapper_store = VectorStoreIndexWrapper(vectorstore=vectorstore)        
+    
+    answer = wrapper_store.query(question=query, llm=llm)    
+    print('answer: ', answer)
+
+    return answer
+    
 def summerize_text(text):
     docs = [
         Document(
@@ -118,50 +131,58 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template(query):
-    relevant_documents = retriever.get_relevant_documents(query)
+def get_answer_using_template(query, vectorstore, rag_type):  
+    relevant_documents = vectorstore.similarity_search(query)
+
+    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    print('----')
+    for i, rel_doc in enumerate(relevant_documents):
+        print(f'## Document {i+1}: {rel_doc.page_content}.......')
+        print('---')
+    
     print('length of relevant_documents: ', len(relevant_documents))
+    
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-    if(len(relevant_documents)==0):
-        return llm(query)
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+    result = qa({"query": query})
+    print('result: ', result)
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
+
+    if len(relevant_documents)>=1:
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
+
+        return result['result']+reference
     else:
-        print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
-        print('----')
-        for i, rel_doc in enumerate(relevant_documents):
-            print(f'## Document {i+1}: {rel_doc.page_content}.......')
-            print('---')
+        return result['result']
 
-        prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-        {context}
-
-        Question: {question}
-        Assistant:"""
-        PROMPT = PromptTemplate(
-            template=prompt_template, input_variables=["context", "question"]
-        )
-
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": PROMPT}
-        )
-        result = qa({"query": query})
-        print('result: ', result)
-
-        source_documents = result['source_documents']        
-        print('source_documents: ', source_documents)
-
-        if len(source_documents)>=1:
-            reference = get_reference(source_documents)
-            # print('reference: ', reference)
-
-            return result['result']+reference
-        else:
-            return result['result']
-
+def get_reference(docs):
+    reference = "\n\nFrom\n"
+    for doc in docs:
+        name = doc.metadata['name']
+        page = doc.metadata['page']
+    
+        reference = reference + (str(page)+'page in '+name+'\n')
+    return reference
+    
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']
@@ -173,6 +194,18 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
+    global llm, vectorstore
+
+    vectorstore = OpenSearchVectorSearch(
+        # index_name = "rag-index-*", // all
+        index_name = 'rag-index-'+userId+'-*',
+        is_aoss = False,
+        #engine="faiss",  # default: nmslib
+        embedding_function = bedrock_embeddings,
+        opensearch_url=opensearch_url,
+        http_auth=(opensearch_account, opensearch_passwd), # http_auth=awsauth,
+    )
+
     start = int(time.time())    
 
     msg = ""
@@ -183,8 +216,11 @@ def lambda_handler(event, context):
         querySize = len(text)
         print('query size: ', querySize)
 
-        if querySize<1000: 
-            answer = get_answer_using_template(text)
+        textCount = len(text.split())
+        print(f"query size: {querySize}, workds: {textCount}")
+
+        if querySize<1800: 
+            answer = get_answer_using_template(text, vectorstore)
         else:
             answer = llm(text)        
         print('answer: ', answer)
@@ -198,8 +234,34 @@ def lambda_handler(event, context):
         file_type = object[object.rfind('.')+1:len(object)]
         print('file_type: ', file_type)
             
-        # summerization to show the document
+        # load documents where text, pdf, csv are supported
         texts = load_document(file_type, object)
+
+        docs = []
+        for i in range(len(texts)):
+            docs.append(
+                Document(
+                    page_content=texts[i],
+                    metadata={
+                        'name': object,
+                        'page':i+1
+                    }
+                )
+            )        
+        print('docs[0]: ', docs[0])    
+        print('docs size: ', len(docs))
+
+        new_vectorstore = OpenSearchVectorSearch(
+            index_name="rag-index-"+userId+'-'+requestId,
+            is_aoss = False,
+            #engine="faiss",  # default: nmslib
+            embedding_function = bedrock_embeddings,
+            opensearch_url = opensearch_url,
+            http_auth=(opensearch_account, opensearch_passwd),
+        )
+        new_vectorstore.add_documents(docs)   
+
+        # summerization to show the document        
         docs = [
             Document(
                 page_content=t

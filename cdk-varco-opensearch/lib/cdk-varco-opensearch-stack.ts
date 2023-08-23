@@ -17,7 +17,7 @@ const region = process.env.CDK_DEFAULT_REGION;
 const debug = false;
 const stage = 'dev';
 const s3_prefix = 'docs';
-const projectName = `chatbot-varco-${region}`;
+const projectName = `chatbot-varco-os-${region}`;
 const bucketName = `storage-for-${projectName}`;
 const endpoint_name = 'endpoint-varco-llm-ko-13b-ist-1';
 const varico_region = "us-west-2";  
@@ -86,7 +86,7 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
     });
 
     // Permission for OpenSearch
-    const domainName = `os-${projectName}`
+    const domainName = `${projectName}`
     const accountId = process.env.CDK_DEFAULT_ACCOUNT;
     const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
     if(debug) {

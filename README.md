@@ -46,7 +46,7 @@ llm = SagemakerEndpoint(
 ```
 
 VARCO LLM의 parameter는 아래와 같습니다.
-- request_output_len: 생성되는 최대 token의 수, 기본값은 1000입니다.
+- request_output_len: 생성되는 최대 token의 수, 기본값은 1000이고, VARCO LLM KO-13B-IST의 최대값은 2048입니다.
 - repetition_penalty: 반복을 제한하기 위한 파라미터로 1.0이면 no panalty입니다. 기본값은 1.3입니다.
 - temperature: 다음 token의 확율(probability)로서 기본값은 0.5입니다.
 

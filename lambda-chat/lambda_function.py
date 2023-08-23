@@ -29,6 +29,8 @@ opensearch_url = os.environ.get('opensearch_url')
 
 opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
+embedding_region = os.environ.get('embedding_region')
+endpoint_embedding = os.environ.get('endpoint_embedding')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -61,6 +63,29 @@ llm = SagemakerEndpoint(
     model_kwargs = parameters,
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
+)
+
+# embedding
+from langchain.embeddings import SagemakerEndpointEmbeddings
+from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
+from typing import Dict, List
+class ContentHandler2(EmbeddingsContentHandler):
+    content_type = "application/json"
+    accepts = "application/json"
+
+    def transform_input(self, inputs: List[str], model_kwargs: Dict) -> bytes:
+        input_str = json.dumps({"text_inputs": inputs, **model_kwargs})
+        return input_str.encode("utf-8")
+
+    def transform_output(self, output: bytes) -> List[List[float]]:
+        response_json = json.loads(output.read().decode("utf-8"))
+        return response_json["embedding"]
+
+content_handler2 = ContentHandler2()
+embeddings = SagemakerEndpointEmbeddings(
+    endpoint_name = endpoint_embedding,
+    region_name = aws_region,
+    content_handler = content_handler2,
 )
 
 # load documents from s3
@@ -201,7 +226,7 @@ def lambda_handler(event, context):
         index_name = 'rag-index-'+userId+'-*',
         is_aoss = False,
         #engine="faiss",  # default: nmslib
-        embedding_function = bedrock_embeddings,
+        embedding_function = embeddings,
         opensearch_url=opensearch_url,
         http_auth=(opensearch_account, opensearch_passwd), # http_auth=awsauth,
     )
@@ -255,7 +280,7 @@ def lambda_handler(event, context):
             index_name="rag-index-"+userId+'-'+requestId,
             is_aoss = False,
             #engine="faiss",  # default: nmslib
-            embedding_function = bedrock_embeddings,
+            embedding_function = embeddings,
             opensearch_url = opensearch_url,
             http_auth=(opensearch_account, opensearch_passwd),
         )

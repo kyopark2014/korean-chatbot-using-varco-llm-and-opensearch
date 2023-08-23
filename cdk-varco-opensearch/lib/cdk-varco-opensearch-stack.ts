@@ -21,7 +21,6 @@ const projectName = `chatbot-varco-${region}`;
 const bucketName = `storage-for-${projectName}`;
 const endpoint_name = 'endpoint-varco-llm-ko-13b-ist-1';
 const varico_region = "us-west-2";  
-const rag_type = 'opensearch';  // faiss or opensearch
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const embedding_region = "us-west-2";  
@@ -197,7 +196,6 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
         callLogTableName: callLogTableName,
         varico_region: varico_region,
         endpoint_name: endpoint_name,
-        rag_type: rag_type,
         opensearch_account: opensearch_account,
         opensearch_passwd: opensearch_passwd,
         embedding_region: embedding_region,

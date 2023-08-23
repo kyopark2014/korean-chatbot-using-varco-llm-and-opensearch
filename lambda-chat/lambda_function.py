@@ -120,7 +120,7 @@ def load_document(file_type, s3_file_name):
             
     return texts
 
-def get_answer_using_query(query, vectorstore, rag_type):
+def get_answer_using_query(query, vectorstore):
     wrapper_store = VectorStoreIndexWrapper(vectorstore=vectorstore)        
     
     answer = wrapper_store.query(question=query, llm=llm)    
@@ -156,7 +156,7 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template(query, vectorstore, rag_type):  
+def get_answer_using_template(query, vectorstore):  
     relevant_documents = vectorstore.similarity_search(query)
 
     print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')

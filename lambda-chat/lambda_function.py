@@ -31,6 +31,8 @@ opensearch_account = os.environ.get('opensearch_account')
 opensearch_passwd = os.environ.get('opensearch_passwd')
 embedding_region = os.environ.get('embedding_region')
 endpoint_embedding = os.environ.get('endpoint_embedding')
+enableOpenSearch = os.environ.get('enableOpenSearch')
+enableReference = os.environ.get('enableReference')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -191,7 +193,7 @@ def get_answer_using_template(query, vectorstore):
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    if len(relevant_documents)>=1:
+    if len(relevant_documents)>=1 and enableReference == 'true':
         reference = get_reference(source_documents)
         #print('reference: ', reference)
 
@@ -219,7 +221,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, vectorstore, embeddings
+    global llm, vectorstore, embeddings, enableOpenSearch, enableReference
 
     vectorstore = OpenSearchVectorSearch(
         # index_name = "rag-index-*", // all
@@ -238,20 +240,34 @@ def lambda_handler(event, context):
     if type == 'text':
         text = body
 
-        querySize = len(text)
-        print('query size: ', querySize)
-
-        textCount = len(text.split())
-        print(f"query size: {querySize}, workds: {textCount}")
-
-        if querySize<1800: 
-            answer = get_answer_using_template(text, vectorstore)
+         # debugging
+        if text == 'enableOpenSearch':
+            enableOpenSearch = 'true'
+            msg  = "OpenSearch is enabled"
+        elif text == 'disableOpenSearch':
+            enableOpenSearch = 'false'
+            msg  = "OpenSearch is disabled"
+        elif text == 'enableReference':
+            enableReference = 'true'
+            msg  = "Referece is enabled"
+        elif text == 'disableReference':
+            enableReference = 'false'
+            msg  = "Reference is disabled"
         else:
-            answer = llm(text)        
-        print('answer: ', answer)
+            querySize = len(text)
+            print('query size: ', querySize)
 
-        pos = answer.rfind('### Assistant:\n')+15
-        msg = answer[pos:]    
+            textCount = len(text.split())
+            print(f"query size: {querySize}, workds: {textCount}")
+
+            if querySize<1800 and enableOpenSearch=='true': 
+                answer = get_answer_using_template(text, vectorstore)
+            else:
+                answer = llm(text)        
+            print('answer: ', answer)
+
+            pos = answer.rfind('### Assistant:\n')+15
+            msg = answer[pos:]    
             
     elif type == 'document':
         object = body

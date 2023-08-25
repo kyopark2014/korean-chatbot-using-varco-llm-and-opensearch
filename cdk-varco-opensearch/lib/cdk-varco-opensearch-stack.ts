@@ -25,6 +25,8 @@ const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const embedding_region = "us-west-2";  
 const endpoint_embedding = 'jumpstart-dft-hf-textembedding-gpt-j-6b-fp16';
+const enableOpenSearch = 'true'; // for debugging
+const enableReference = 'false';
 
 export class CdkVarcoOpensearchStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -199,7 +201,9 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
         opensearch_account: opensearch_account,
         opensearch_passwd: opensearch_passwd,
         embedding_region: embedding_region,
-        endpoint_embedding: endpoint_embedding
+        endpoint_embedding: endpoint_embedding,
+        enableOpenSearch: enableOpenSearch,
+        enableReference: enableReference    
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  

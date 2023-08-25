@@ -24,7 +24,8 @@ const varco_region = "us-west-2";
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const embedding_region = "us-west-2";  
-const endpoint_embedding = 'jumpstart-dft-hf-textembedding-gpt-j-6b-fp16';
+//const endpoint_embedding = 'jumpstart-dft-hf-textembedding-gpt-j-6b-fp16';
+const endpoint_embedding = 'jumpstart-dft-embedding-gpt-j-6b-varco';
 const enableOpenSearch = 'true'; // for debugging
 const enableReference = 'false';
 

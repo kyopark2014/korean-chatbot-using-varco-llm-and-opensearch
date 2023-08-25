@@ -227,7 +227,7 @@ def test_embedding():
     client = boto3.client('runtime.sagemaker')
     query_response = client.invoke_endpoint(EndpointName=endpoint_name, ContentType='application/json', Body=payload)
 
-    model_predictions = json.loads(query_response['Body'].read())
+    model_predictions = json.loads(query_response['Body'].read().decode("utf-8"))
     embeddings = model_predictions['embedding']
     
     print("embeddings: ", embeddings)

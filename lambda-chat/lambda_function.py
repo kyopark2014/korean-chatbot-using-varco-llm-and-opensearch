@@ -86,7 +86,7 @@ class ContentHandler2(EmbeddingsContentHandler):
 content_handler2 = ContentHandler2()
 embeddings = SagemakerEndpointEmbeddings(
     endpoint_name = endpoint_embedding,
-    region_name = aws_region,
+    region_name = embedding_region,
     content_handler = content_handler2,
 )
 

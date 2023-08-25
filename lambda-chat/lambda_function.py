@@ -212,7 +212,29 @@ def get_reference(docs):
     
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
+
     
+def test_embedding():
+    text1 = "How cute your dog is!"
+    text2 = "Your dog is so cute."
+    text3 = "The mitochondria is the powerhouse of the cell."
+
+    newline, bold, unbold = '\n', '\033[1m', '\033[0m'
+    endpoint_name = 'jumpstart-dft-embedding-gpt-j-6b-varco'
+        
+    payload = {"text_inputs": [text1, text2, text3]}
+
+    client = boto3.client('runtime.sagemaker')
+    query_response = client.invoke_endpoint(EndpointName=endpoint_name, ContentType='application/json', Body=payload).encode('utf-8'))
+
+    model_predictions = json.loads(query_response['Body'].read())
+    embeddings = model_predictions['embedding']
+    
+    print("embeddings: ", embeddings)
+
+test_embedding()
+
+
 def lambda_handler(event, context):
     print(event)
     userId  = event['user-id']

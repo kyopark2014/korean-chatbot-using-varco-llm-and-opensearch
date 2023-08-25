@@ -90,6 +90,9 @@ embeddings = SagemakerEndpointEmbeddings(
     content_handler = content_handler2,
 )
 
+print('embedding_region: ', embedding_region)
+print('endpoint_embedding: ', endpoint_embedding)
+
 # load documents from s3
 def load_document(file_type, s3_file_name):
     s3r = boto3.resource("s3")

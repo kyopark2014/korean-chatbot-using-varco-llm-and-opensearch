@@ -219,7 +219,7 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, vectorstore
+    global llm, vectorstore, embeddings
 
     vectorstore = OpenSearchVectorSearch(
         # index_name = "rag-index-*", // all

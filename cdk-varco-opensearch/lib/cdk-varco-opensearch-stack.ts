@@ -20,7 +20,7 @@ const s3_prefix = 'docs';
 const projectName = `chatbot-varco-os-${region}`;
 const bucketName = `storage-for-${projectName}`;
 const endpoint_name = 'endpoint-varco-llm-ko-13b-ist-1';
-const varico_region = "us-west-2";  
+const varco_region = "us-west-2";  
 const opensearch_account = "admin";
 const opensearch_passwd = "Wifi1234!";
 const embedding_region = "us-west-2";  
@@ -196,7 +196,7 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
         s3_bucket: s3Bucket.bucketName,
         s3_prefix: s3_prefix,
         callLogTableName: callLogTableName,
-        varico_region: varico_region,
+        varco_region: varco_region,
         endpoint_name: endpoint_name,
         opensearch_account: opensearch_account,
         opensearch_passwd: opensearch_passwd,

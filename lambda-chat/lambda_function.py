@@ -18,13 +18,15 @@ from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain.embeddings import SagemakerEndpointEmbeddings
+from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
 s3_prefix = os.environ.get('s3_prefix')
 callLogTableName = os.environ.get('callLogTableName')
 endpoint_name = os.environ.get('endpoint_name')
-varico_region = os.environ.get('varico_region')
+varco_region = os.environ.get('varco_region')
 opensearch_url = os.environ.get('opensearch_url')
 
 opensearch_account = os.environ.get('opensearch_account')
@@ -61,15 +63,13 @@ parameters = {
 
 llm = SagemakerEndpoint(
     endpoint_name = endpoint_name, 
-    region_name = varico_region, 
+    region_name = varco_region, 
     model_kwargs = parameters,
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
 )
 
 # embedding
-from langchain.embeddings import SagemakerEndpointEmbeddings
-from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
 from typing import Dict, List
 class ContentHandler2(EmbeddingsContentHandler):
     content_type = "application/json"

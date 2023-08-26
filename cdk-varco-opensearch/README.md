@@ -2,7 +2,7 @@
 
 여기서는 [cdk-varco-opensearch-stack.ts](./lib/cdk-varco-opensearch-stack.ts)에서 정의한 인프라 코드에 대하여 설명합니다.
 
-Chatbot UI를 보여지기 위하여 CloudFront는 S3에 저장된 html, css, image파일을 로드합니다. 또한 S3는 Kendra에 문서 파일을 업로드하기 스토리지로도 사용됩니다.
+Chatbot UI를 보여지기 위하여 CloudFront는 S3에 저장된 html, css, image파일을 로드합니다. 또한 S3는 OpenSearch에 문서 파일을 업로드하기 스토리지로도 사용됩니다.
 
 ```java
 const s3Bucket = new s3.Bucket(this, `storage-${projectName}`, {

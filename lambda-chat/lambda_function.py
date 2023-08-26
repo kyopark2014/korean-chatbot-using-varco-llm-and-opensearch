@@ -122,7 +122,7 @@ embeded = embeddings.embed_documents(
     ]
 )
 print('embeded length: ', len(embeded))
-print('embeded: ', embeded)
+print('embeded: ', embeded[0][:5])
 
 embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
 embedded_query[:5]

@@ -297,8 +297,9 @@ def lambda_handler(event, context):
                 n = length-i
             print('n: ', n)
 
-            for j in n:
+            for j in range(n):
                 print(' i: ', i)
+                print(' j: ', j)
 
                 docs.append(
                     Document(

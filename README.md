@@ -109,7 +109,7 @@ VARCO LLM의 주요 parameter는 아래와 같습니다.
 
 ### Embedding
 
-OpenSearch에 보내는 query를 vector화 위해서는 embedding function이 필요합니다. 여기서는 [GPT-J 6B Embedding FP16](https://aws.amazon.com/ko/blogs/machine-learning/fine-tune-gpt-j-using-an-amazon-sagemaker-hugging-face-estimator-and-the-model-parallel-library/)을 이용하여 embedding을 수행합니다. GPT-J embedding은 semantic search와 question and answering 같은 text generation에 유용하게 이용할 수 있습니다. GPT-J embedding은 SagMaker JumpStart를 이용해 배포하므로 [SageMaker Endpoint Embeddings](https://python.langchain.com/docs/integrations/text_embedding/sagemaker-endpoint)을 이용하여 아래와 같이 정의합니다.
+OpenSearch에 보내는 query를 vector로 변환 위해서는 embedding function이 필요합니다. 여기서는 [GPT-J 6B Embedding FP16](https://aws.amazon.com/ko/blogs/machine-learning/fine-tune-gpt-j-using-an-amazon-sagemaker-hugging-face-estimator-and-the-model-parallel-library/)을 이용하여 embedding을 수행합니다. GPT-J embedding은 semantic search와 question and answering 같은 text generation에 유용하게 이용할 수 있습니다. GPT-J embedding은 SagMaker JumpStart를 이용해 배포하므로 [SageMaker Endpoint Embeddings](https://python.langchain.com/docs/integrations/text_embedding/sagemaker-endpoint)을 이용하여 아래와 같이 정의합니다.
 
 ```python
 from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler

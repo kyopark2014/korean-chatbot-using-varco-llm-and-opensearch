@@ -11,7 +11,8 @@
 전체적인 Architecture는 아래와 같습니다. 사용자의 질문은 Query로 [Amazon CloudFront](https://aws.amazon.com/ko/cloudfront/)와 [Amazon API Gateway](https://aws.amazon.com/ko/api-gateway/)를 거쳐서, Lambda에 전달됩니다. Lambda는 Embedding을 통해 Query를 Vector화한 다음에, OpenSearch로 Query를 전달하여 관련된 문서를 받은후에 VARCO LLM에 전달하여 답변을 얻습니다. 이후 답변은 사용자에게 전달되어 채팅화면에 표시됩니다. 또한 채팅이력은 [Amazon DynamoDB](https://aws.amazon.com/ko/dynamodb/)를 이용해 저장되고 활용됩니다.
 
 
-<img src="https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/4d5fe46a-377e-49f4-a57d-6bdbc1b1d35a" width="800">
+<img src="https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0baa76e5-5502-45d1-aa0b-71c4a9ce0a27" width="800">
+
 
 상세한 Call Flow는 아래와 같습니다.
 

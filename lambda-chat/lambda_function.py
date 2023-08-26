@@ -291,7 +291,7 @@ def lambda_handler(event, context):
         for i in range(int(length/5+1)):
             docs = []
 
-            if n > length: 
+            if n >= length: 
                 break
 
             for j in range(5):
@@ -309,7 +309,7 @@ def lambda_handler(event, context):
                 )   
                 n = n+1
 
-                if n > length: 
+                if n >= length: 
                     break
 
             print('docs[0]: ', docs[0])    

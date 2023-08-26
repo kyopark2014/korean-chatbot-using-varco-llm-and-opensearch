@@ -199,15 +199,14 @@ def get_answer_using_template(query, vectorstore):
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    #if len(relevant_documents)>=1 and enableReference == 'true':
-    #    reference = get_reference(source_documents)
-    #    #print('reference: ', reference)
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
 
-    #    return result['result']+reference
-    #else:
-    #    return result['result']
-    return result['result']
-
+        return result['result']+reference
+    else:
+        return result['result']
+    
 def get_reference(docs):
     reference = "\n\nFrom\n"
     for doc in docs:

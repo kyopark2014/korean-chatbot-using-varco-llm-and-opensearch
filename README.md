@@ -109,7 +109,7 @@ VARCO LLM의 주요 parameter는 아래와 같습니다.
 
 ### Embedding
 
-OpenSearch에 보내는 query를 vector로 변환 위해서는 embedding function이 필요합니다. 여기서는 [GPT-J 6B Embedding FP16](https://aws.amazon.com/ko/blogs/machine-learning/fine-tune-gpt-j-using-an-amazon-sagemaker-hugging-face-estimator-and-the-model-parallel-library/)을 이용하여 embedding을 수행합니다. GPT-J embedding은 semantic search와 question and answering 같은 text generation에 유용하게 이용할 수 있습니다. GPT-J embedding은 SagMaker JumpStart를 이용해 배포하므로 [SageMaker Endpoint Embeddings](https://python.langchain.com/docs/integrations/text_embedding/sagemaker-endpoint)을 이용하여 아래와 같이 정의합니다.
+OpenSearch에 보내는 query를 vector로 변환하기 위해서는 embedding function이 필요합니다. 여기서는 [GPT-J 6B Embedding FP16](https://aws.amazon.com/ko/blogs/machine-learning/fine-tune-gpt-j-using-an-amazon-sagemaker-hugging-face-estimator-and-the-model-parallel-library/)을 이용하여 embedding을 수행합니다. GPT-J embedding은 semantic search와 text generation에 유용하게 이용할 수 있습니다. GPT-J embedding은 SagMaker JumpStart를 이용해 배포할 수 있으므로 [SageMaker Endpoint Embeddings](https://python.langchain.com/docs/integrations/text_embedding/sagemaker-endpoint)을 이용하여 아래와 같이 정의합니다.
 
 ```python
 from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
@@ -129,7 +129,7 @@ class ContentHandler2(EmbeddingsContentHandler):
 content_handler2 = ContentHandler2()
 embeddings = SagemakerEndpointEmbeddings(
     endpoint_name = endpoint_embedding,
-    region_name = aws_region,
+    region_name = embedding_region,
     content_handler = content_handler2,
 )
 ```
@@ -140,7 +140,6 @@ LangChain의 [OpenSearchVectorSearch](https://api.python.langchain.com/en/latest
 
 ```python
 vectorstore = OpenSearchVectorSearch(
-    # index_name = "rag-index-*", // all
     index_name = 'rag-index-'+userId+'-*',
     is_aoss = False,
     #engine="faiss",  # default: nmslib
@@ -202,7 +201,7 @@ for i in range(len(texts)):
     )
 ```
 
-여기서는 OpenSearch의 index로 userId와 requestId로 생성하였습니다. 아래처럼 userId를 index에 포함시켜면 개인화된 RAG를 구성할 수 있습니다. 만약, 그룹단위로 RAG를 구성한다면 userId 대신에 groupId를 생성하는 방법으로 응용할 수 있습니다. 또한 vectorstore의 embedding 함수를 embeddings로 지정하였습니다.
+OpenSearch에 문서를 넣을때에, userId와 requestId를 이용해 index_name을 생성하였습니다. 아래처럼 userId를 index에 포함한후 RAG를 관련 index로 검색하면 개인화된 RAG를 구성할 수 있습니다. 만약, 그룹단위로 RAG를 구성한다면 userId 대신에 groupId를 생성하는 방법으로 응용할 수 있습니다. 
 
 ```
 new_vectorstore = OpenSearchVectorSearch(
@@ -216,9 +215,9 @@ new_vectorstore = OpenSearchVectorSearch(
 new_vectorstore.add_documents(docs)   
 ```
 
-### Query와 관련된 문서의 OpenSearch로 부터 가져오기 
+### OpenSearch를 이용하여 Query하기
 
-RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 retriever를 OpenSearch로 만든 vectorstore로 지정하여 similarity search를 수행합니다. 또한 아래와 같이 template를 이용합니다.
+RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 OpenSearch로 구성된 vectorstore를 retriever를 지정합니다. 이때 search_type을 similarity search로 지정하여 문서를 3개까지 가져오도록 설정하였습니다. RAG의 문서와 함께 template를 사용하여 정확도를 높입니다.
 
 ```python
 from langchain.chains import RetrievalQA
@@ -253,7 +252,7 @@ def get_answer_using_template(query, vectorstore):
         return result['result']
 ```
 
-RAG에서 Vector 검색에 사용하는 OpenSearch의 query size의 제한을 고려하여 여기서는 1800자 이상의 query에 대해서 아래와 같이 RAG를 적용합니다. 
+RAG에서 Vector 검색에 사용하는 OpenSearch는 query size의 제한이 있습니다. 여기서는 1800자 이상의 query에 대해서만 RAG를 적용합니다. 
 
 ```python
 if querySize<1800 and enableOpenSearch=='true': 
@@ -305,7 +304,7 @@ msg = answer[pos:]
 cdk destroy
 ```
 
-본 실습에서는 VARCO LLM의 endpoint로 "ml.g5.12xlarge"를 사용하고 있으므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
+본 실습에서는 VARCO LLM의 endpoint와 embedding으로 "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용하고 있ㅇ므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
 
 
 

@@ -225,6 +225,85 @@ response_payload = json.loads(response['Body'].read())
 msg = response_payload['result'][0]
 ```
 
+### embedding test example
+
+invoke_endpoint을 이용해 테스트 하는 방법입니다. 
+
+```python
+def test_embedding():
+    text1 = "How cute your dog is!"
+    text2 = "Your dog is so cute."
+    text3 = "The mitochondria is the powerhouse of the cell."
+
+    newline, bold, unbold = '\n', '\033[1m', '\033[0m'
+    #endpoint_name = 'jumpstart-dft-embedding-gpt-j-6b-varco'
+        
+    payload = {"text_inputs": [text1, text2, text3]}
+
+    encoded_json = json.dumps(payload).encode('utf-8')
+
+    client = boto3.client('runtime.sagemaker')
+    query_response = client.invoke_endpoint(EndpointName=endpoint_embedding, ContentType='application/json', Body=encoded_json)
+
+    model_predictions = json.loads(query_response['Body'].read())
+    embeddings = model_predictions['embedding']
+    
+    print("embeddings: ", embeddings[0][:5])
+
+test_embedding()
+```
+
+이때의 결과는 아래와 같습니다.
+
+```text
+embeddings:  [0.0013134770561009645, -0.018332622945308685, -0.01694120466709137, -0.009232349693775177, 0.015922974795103073]
+```
+
+LangChain으로 테스트 하는 방법입니다.
+
+```
+from typing import Dict, List
+class ContentHandler2(EmbeddingsContentHandler):
+    content_type = "application/json"
+    accepts = "application/json"
+
+    def transform_input(self, inputs: List[str], model_kwargs: Dict) -> bytes:
+        input_str = json.dumps({"text_inputs": inputs, **model_kwargs})
+        return input_str.encode("utf-8")
+
+    def transform_output(self, output: bytes) -> List[List[float]]:
+        response_json = json.loads(output.read().decode("utf-8"))
+        return response_json["embedding"]
+
+content_handler2 = ContentHandler2()
+embeddings = SagemakerEndpointEmbeddings(
+    endpoint_name = endpoint_embedding,
+    region_name = embedding_region,
+    content_handler = content_handler2,
+)
+
+embeded = embeddings.embed_documents(
+    [
+        "Hi there!",
+        "Oh, hello!",
+        "What's your name?",
+        "My friends call me World",
+        "Hello World!"
+    ]
+)
+print('embeded length: ', len(embeded))
+print('embeded: ', embeded[0][:5])
+
+embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
+embedded_query[:5]
+```
+
+이때의 결과는 아래와 같습니다.
+
+```text
+embeded length:  5
+embeded:  [0.013767411932349205, -0.004349768161773682, -0.01514718122780323, -0.024414923042058945, 0.0014429446309804916]
+```
 
 ### Troubleshooting
 

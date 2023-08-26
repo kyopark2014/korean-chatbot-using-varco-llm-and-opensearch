@@ -69,8 +69,6 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-
-
 # embedding
 from typing import Dict, List
 class ContentHandler2(EmbeddingsContentHandler):
@@ -92,9 +90,8 @@ embeddings = SagemakerEndpointEmbeddings(
     content_handler = content_handler2,
 )
 
-embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
-print("embedded_query: ", embedded_query[:5])
-
+#embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
+#print("embedded_query: ", embedded_query[:5])
 
 print('embedding_region: ', embedding_region)
 print('endpoint_embedding: ', endpoint_embedding)
@@ -168,15 +165,15 @@ def get_reference(docs):
     return reference
 
 def get_answer_using_template(query, vectorstore):  
-    relevant_documents = vectorstore.similarity_search(query)
+    #relevant_documents = vectorstore.similarity_search(query)
 
-    print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
-    print('----')
-    for i, rel_doc in enumerate(relevant_documents):
-        print(f'## Document {i+1}: {rel_doc.page_content}.......')
-        print('---')
+    #print(f'{len(relevant_documents)} documents are fetched which are relevant to the query.')
+    #print('----')
+    #for i, rel_doc in enumerate(relevant_documents):
+    #    print(f'## Document {i+1}: {rel_doc.page_content}.......')
+    #    print('---')
     
-    print('length of relevant_documents: ', len(relevant_documents))
+    #print('length of relevant_documents: ', len(relevant_documents))
     
     prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
@@ -202,13 +199,14 @@ def get_answer_using_template(query, vectorstore):
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
-    if len(relevant_documents)>=1 and enableReference == 'true':
-        reference = get_reference(source_documents)
-        #print('reference: ', reference)
+    #if len(relevant_documents)>=1 and enableReference == 'true':
+    #    reference = get_reference(source_documents)
+    #    #print('reference: ', reference)
 
-        return result['result']+reference
-    else:
-        return result['result']
+    #    return result['result']+reference
+    #else:
+    #    return result['result']
+    return result['result']
 
 def get_reference(docs):
     reference = "\n\nFrom\n"

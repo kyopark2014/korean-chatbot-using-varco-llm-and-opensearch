@@ -138,9 +138,9 @@ const roleLambda = new iam.Role(this, `role-lambda-chat-for-${projectName}`, {
 roleLambda.addManagedPolicy({
     managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
 });
-roleLambda.attachInlinePolicy( // add kendra policy
-    new iam.Policy(this, `lambda-inline-policy-for-kendra-in-${projectName}`, {
-        statements: [kendraPolicy],
+roleLambda.attachInlinePolicy( // add opensearch policy
+    new iam.Policy(this, `opensearch-policy-for-${projectName}`, {
+        statements: [OpenSearchPolicy],
     }),
 );
 ```

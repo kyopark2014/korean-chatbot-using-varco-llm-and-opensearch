@@ -77,9 +77,11 @@ class ContentHandler(LLMContentHandler):
         return response_json["result"][0]
 ```
 
-VARCO LLM은 SageMaker endpoint를 이용하여 접근할 수 있습니다. 아래와 같이 ContentHandler를 이용하여 LangChain을 연결합니다. 
+VARCO LLM은 SageMaker endpoint를 이용하여 생성하므로, LangChain의 [SagemakerEndpoint](https://python.langchain.com/docs/integrations/llms/sagemaker)와 ContentHandler를 이용하여 LangChain과 연결합니다. 
 
 ```python
+from langchain.embeddings import SagemakerEndpointEmbeddings
+
 content_handler = ContentHandler()
 aws_region = boto3.Session().region_name
 client = boto3.client("sagemaker-runtime")

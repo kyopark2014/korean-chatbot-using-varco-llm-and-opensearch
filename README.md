@@ -1,4 +1,4 @@
-# VARCO LLM과 OpenSearch를 이용하여 한국어 Chatbot 만들기
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0585fc07-3baf-4b1c-9cc9-567e97f6a4be)# VARCO LLM과 OpenSearch를 이용하여 한국어 Chatbot 만들기
 
 여기서는 [VARCO LLM](https://ncsoft.github.io/ncresearch/varco-llm/)와 [Amazon OpenSearch](https://docs.aws.amazon.com/ko_kr/opensearch-service/latest/developerguide/what-is.html)를 이용하여 Question/Answering을 위한 한국어 Chatbot을 구현하고자 합니다. VARCO LLM은 엔씨소프트(NC SOFT)에서 제공하는 대용량 언어 모델(LLM)입니다. VARCO LLM KO-13B-IST는 VARCO LLM KO-13B-FM의 파인튜닝 모델로서 Question and Answering, Summarization등 다양한 태스크에 활용할 수 있으며, [Amazon SageMaker](https://aws.amazon.com/marketplace/seller-profile?id=seller-tkuvdeznmi2w4)를 이용하여 쉽게 배포하여 사용할 수 있습니다.  
 
@@ -290,7 +290,18 @@ msg = answer[pos:]
 
 ### 실행결과
 
+아래와 같이 "Kendra에 대해 설명해줘"라고 질문을 하였습니다. VARCO LLM에서 학습되지 않은 경우에는 아래처럼 기대와 다른 정보를 전달합니다.
 
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/320d9acc-3533-456d-bba1-2362108231d5)
+
+[Amazon_Kendra.pdf](./Amazon_Kendra.pdf)을 다운받은 후에 아래 채팅장의 파일버튼을 선택하여 업로드합니다. 이후 Kendra에 등록이 되고 아래와 같이 요약(summarization) 결과를 보여줍니다. Amazon_Kendra.pdf는 Kendra 서비스에 대한 소개자료입니다.
+
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0f56a282-8440-4928-9fde-ac99154b76ea)
+
+
+이제 다시 "Kendra에 대해 설명해줘"라고 질문을 하면 업로드한 Amazon_Kendra.pdf을 참조하여 아래와 같이 Kendra에 대한 정확한 응답을 얻을 수 있습니다.
+
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/f1c96a77-4913-42d8-99cb-8b1bc7803a83)
 
 
 

@@ -271,7 +271,7 @@ print('embeded length: ', len(embeded))
 print('embeded: ', embeded[0][:5])
 
 embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
-embedded_query[:5]
+print("embedded_query: ", embedded_query[:5])
 ```
 
 이때의 결과는 아래와 같습니다.
@@ -279,6 +279,7 @@ embedded_query[:5]
 ```text
 embeded length:  5
 embeded:  [0.013767411932349205, -0.004349768161773682, -0.01514718122780323, -0.024414923042058945, 0.0014429446309804916]
+embedded_query:  [0.01781562715768814, -0.010036011226475239, 0.0072834971360862255, 0.0027703342493623495, 0.01133547443896532]
 ```
 
 ### Troubleshooting

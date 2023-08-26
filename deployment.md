@@ -30,6 +30,12 @@
 
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm/assets/52392004/5aba1f72-d86e-46f3-b17b-700f07aed787)
 
+## Embedding
+
+[SageMaker Console](https://us-east-1.console.aws.amazon.com/sagemaker/home?region=us-east-1#/studio)에서 SageMaker Studio를 실행한 후에, SageMaker JumpStart에서 "GPT-J 6B Embedding FP16"를 고른후에 Deploy를 선택합니다. 설치가 되면 "jumpstart-dft-hf-textembedding-gpt-j-6b-fp16"와 같이 Endpoint가 생성됩니다.
+
+![noname](https://github.com/kyopark2014/Llama2-chatbot-with-vector-store/assets/52392004/80a24a19-3f28-4af0-b316-335df23f2bdf)
+
 
 
 

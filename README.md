@@ -304,9 +304,6 @@ msg = answer[pos:]
 ![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/f1c96a77-4913-42d8-99cb-8b1bc7803a83)
 
 
-![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0585fc07-3baf-4b1c-9cc9-567e97f6a4be)
-
-
 ## 리소스 정리하기
 
 더이상 인프라를 사용하지 않는 경우에 아래처럼 모든 리소스를 삭제할 수 있습니다. [Cloud9 console](https://us-west-2.console.aws.amazon.com/cloud9control/home?region=us-west-2#/)에 접속하여 아래와 같이 삭제를 합니다.

@@ -92,8 +92,21 @@ embeddings = SagemakerEndpointEmbeddings(
     content_handler = content_handler2,
 )
 
+embeded = embeddings.embed_documents(
+    [
+        "Hi there!",
+        "Oh, hello!",
+        "What's your name?",
+        "My friends call me World",
+        "Hello World!"
+    ]
+)
+print('embeded length: ', len(embeded))
+print('embeded: ', embeded[0][:5])
+
 embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
-print('embeded test: ', embedded_query[0][:5])
+embedded_query[:5]
+
 
 print('embedding_region: ', embedding_region)
 print('endpoint_embedding: ', endpoint_embedding)

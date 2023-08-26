@@ -23,7 +23,7 @@ VARCO LLM의 Input형태는 아래와 같습니다.
   "repetition_penalty": 1.1,
   "temperature": 0.1,
   "top_k": 50,
-  "top_p": 0.9
+  "top_p": 0.1
 }
 ```
 VARCO LLM의 Output의 기본 포맷은 아래와 같습니다.

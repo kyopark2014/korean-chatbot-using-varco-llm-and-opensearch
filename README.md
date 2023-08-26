@@ -6,6 +6,8 @@
 
 여기서는 대규모 언어 모델을 위한 어플리케이션 개발 프레임워크인 [LangChain](https://www.langchain.com/)을 활용하여 어플리케이션을 개발하며, Amazon의 대표적인 [서버리스 서비스](https://aws.amazon.com/ko/serverless/)인 [Amazon Lambda](https://aws.amazon.com/ko/lambda/)로 서빙하는 인프라를 구축합니다. Amazon Lambda를 비롯한 인프라를 배포하고 관리하기 위하여 [Amazon CDK](https://aws.amazon.com/ko/cdk/)를 활용합니다.
 
+## Architecture 개요
+
 전체적인 Architecture는 아래와 같습니다. 사용자의 질문은 Query로 [Amazon CloudFront](https://aws.amazon.com/ko/cloudfront/)와 [Amazon API Gateway](https://aws.amazon.com/ko/api-gateway/)를 거쳐서, Lambda에 전달됩니다. Lambda는 Embedding을 통해 Query를 Vector화한 다음에, OpenSearch로 Query를 전달하여 관련된 문서를 받은후에 VARCO LLM에 전달하여 답변을 얻습니다. 이후 답변은 사용자에게 전달되어 채팅화면에 표시됩니다. 또한 채팅이력은 [Amazon DynamoDB](https://aws.amazon.com/ko/dynamodb/)를 이용해 저장되고 활용됩니다.
 
 
@@ -25,7 +27,12 @@
 
 단계6: 사용자에게 응답으로 결과를 전달합니다.
 
-## LangChain과 연동하기 
+
+
+
+## 주요 시스템 구성
+
+### LangChain과 연동하기 
 
 LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되며 이때의 입출력의 형태는 아래와 같습니다. 
 
@@ -97,8 +104,27 @@ VARCO LLM의 parameter는 아래와 같습니다.
 - repetition_penalty: 반복을 제한하기 위한 파라미터로 1.0이면 no panalty입니다. 기본값은 1.3입니다.
 - temperature: 다음 token의 확율(probability)로서 기본값은 0.5입니다.
 
+### Embedding
 
-## 문서 읽어서 OpenSearch에 올리기
+
+
+### OpenSearch를 이용하여 Vector Store 구성하기
+
+LangChain의 [OpenSearchVectorSearch](https://api.python.langchain.com/en/latest/vectorstores/langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch.html)을 이용하여 vectorstore를 정의합니다. 여기서는 개인화된 RAG를 적용하기 위하여 OpenSearch의 index에 [UUID](https://www.cockroachlabs.com/blog/what-is-a-uuid/)로 구성된 userId를 추가하였습니다. 
+
+```python
+vectorstore = OpenSearchVectorSearch(
+    # index_name = "rag-index-*", // all
+    index_name = 'rag-index-'+userId+'-*',
+    is_aoss = False,
+    #engine="faiss",  # default: nmslib
+    embedding_function = embeddings,
+    opensearch_url=opensearch_url,
+    http_auth=(opensearch_account, opensearch_passwd), # http_auth=awsauth,
+)
+```
+
+### 문서를 OpenSearch에 올리기
 
 S3에서 PDF, TXT, CSV 파일을 아래처럼 읽어올 수 있습니다. pdf의 경우에 PyPDF2를 이용하여 S3의 PDF파일을 page 단위로 읽어옵니다. 이때, 불필요한 '\x00', '\x01'은 아래와 같이 제거합니다. 또한 LLM의 token size 제한을 고려하여, 아래와 같이 RecursiveCharacterTextSplitter을 이용하여 chunk 단위로 문서를 나눕니다. 
 
@@ -132,45 +158,39 @@ def load_document(file_type, s3_file_name):
     return texts
 ```
 
-## 읽어온 문서를 Document로 저장하기
-
-S3로 부터 읽어온 문서를 page 단위로 Document()에 저장합니다. 이때 metadata는 파일이름과 Chunk의 순서를 page로 입력합니다. 
+이제 아래와 같이 load_document()을 이용하여 문서를 texts로 읽은후에 chunk를 page로 하는 Document를 만듭니다. 이때 파일 이름과 page로 구성되는 metadata를 정의합니다. 
 
 ```python
 texts = load_document(file_type, object)
+
 docs = []
 for i in range(len(texts)):
     docs.append(
         Document(
-            page_content=texts[i],
-            metadata={
+            page_content = texts[i],
+            metadata = {
                 'name': object,
-                'page':i+1
+                'page': i + 1
             }
         )
-    )        
+    )
 ```
 
-사용자의 편의를 위하여 아래와 같이 읽어온 문서의 3page 내에서 문서의 요약 정보를 제공합니다.
+여기서는 OpenSearch의 index로 userId와 requestId로 생성하였습니다. 아래처럼 userId를 index에 포함시켜면 개인화된 RAG를 구성할 수 있습니다. 만약, 그룹단위로 RAG를 구성한다면 userId 대신에 groupId를 생성하는 방법으로 응용할 수 있습니다. 또한 vectorstore의 embedding 함수를 embeddings로 지정하였습니다.
 
-```python
-prompt_template = """Write a concise summary of the following:
-
-{ text }
-                
-CONCISE SUMMARY """
-
-PROMPT = PromptTemplate(template = prompt_template, input_variables = ["text"])
-chain = load_summarize_chain(llm, chain_type = "stuff", prompt = PROMPT)
-summary = chain.run(docs)
-
-pos = summary.rfind('### Assistant:\n') + 15
-msg = summary[pos:]
+```
+new_vectorstore = OpenSearchVectorSearch(
+    index_name = "rag-index-" + userId + '-' + requestId,
+    is_aoss = False,
+    #engine = "faiss",  # default: nmslib
+    embedding_function = embeddings,
+    opensearch_url = opensearch_url,
+    http_auth = (opensearch_account, opensearch_passwd),
+)
+new_vectorstore.add_documents(docs)   
 ```
 
-
-
-## Query와 관련된 문서의 OpenSearch로 부터 가져오기 
+### Query와 관련된 문서의 OpenSearch로 부터 가져오기 
 
 RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 retriever를 OpenSearch로 만든 vectorstore로 지정하여 similarity search를 수행합니다. 또한 아래와 같이 template를 이용합니다.
 
@@ -227,6 +247,9 @@ msg = answer[pos:]
 
 [CDK 구현 코드](./cdk-qa-with-rag/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
 
+
+
+
 ## 직접 실습 해보기
 
 ### 사전 준비 사항
@@ -242,7 +265,13 @@ msg = answer[pos:]
 
 ### 실행결과
 
-### 리소스 정리하기
+
+
+
+
+
+
+## 리소스 정리하기
 
 더이상 인프라를 사용하지 않는 경우에 아래처럼 모든 리소스를 삭제할 수 있습니다. [Cloud9 console](https://us-west-2.console.aws.amazon.com/cloud9control/home?region=us-west-2#/)에 접속하여 아래와 같이 삭제를 합니다.
 
@@ -251,6 +280,9 @@ cdk destroy
 ```
 
 본 실습에서는 VARCO LLM의 endpoint로 "ml.g5.12xlarge"를 사용하고 있으므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
+
+
+
 
 ## 결론
 

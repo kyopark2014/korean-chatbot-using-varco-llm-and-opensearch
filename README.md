@@ -201,30 +201,6 @@ response_payload = json.loads(response['Body'].read())
 msg = response_payload['result'][0]
 ```
 
-### invode_endpoint API 사용 예제
-LangChain없이 API를 이용하여 아래와 같이 응답을 얻을 수 있습니다.
-
-```python
-payload = {
-    "text": text,
-    "request_output_len": 512,
-    "repetition_penalty": 1.1,
-    "temperature": 0.9,
-    "top_k": 50,
-    "top_p": 0.9
-}
-
-client = boto3.client('runtime.sagemaker')
-response = client.invoke_endpoint(
-    EndpointName = endpoint_name,
-    ContentType = 'application/json',
-    Body = json.dumps(payload).encode('utf-8'))
-
-response_payload = json.loads(response['Body'].read())
-
-msg = response_payload['result'][0]
-```
-
 ### embedding test example
 
 invoke_endpoint을 이용해 테스트 하는 방법입니다. 

@@ -14,7 +14,29 @@
 
 ## LangChain과 연동하기 
 
-LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되므로 아래와 같이 VARCO LLM의 입력과 출력의 포맷을 맞추어서 ContentHandler를 정의합니다. 
+VARCO LLM의 Input형태는 아래와 같습니다.
+
+```java
+{
+  "text": "input text here",
+  "request_output_len": 512,
+  "repetition_penalty": 1.1,
+  "temperature": 0.1,
+  "top_k": 50,
+  "top_p": 0.9
+}
+```
+VARCO LLM의 Output의 기본 포맷은 아래와 같습니다.
+
+```java
+{
+  "result": [
+    "output text here"
+  ]
+}
+```
+
+LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되므로 아래와 같이 VARCO LLM의 입력과 출력의 포맷을 맞추어서 ContentHandler를 정의합니다. 상세한 내용은 [lambda-chat](./lambda-chat/lambda_function.py)에서 확인할 수 있습니다.
 
 ```python
 class ContentHandler(LLMContentHandler):
@@ -41,7 +63,7 @@ client = boto3.client("sagemaker-runtime")
 parameters = {
     "request_output_len": 512,
     "repetition_penalty": 1.1,
-    "temperature": 0.1,
+    "temperature": 0.9,
     "top_k": 50,
     "top_p": 0.9
 } 
@@ -56,21 +78,12 @@ llm = SagemakerEndpoint(
 ```
 
 VARCO LLM의 parameter는 아래와 같습니다.
-- request_output_len: 생성되는 최대 token의 수, 기본값은 1000이고, VARCO LLM KO-13B-IST의 최대값은 2048입니다.
+- request_output_len: 생성되는 최대 token의 수, 기본값은 1000입니다.
 - repetition_penalty: 반복을 제한하기 위한 파라미터로 1.0이면 no panalty입니다. 기본값은 1.3입니다.
 - temperature: 다음 token의 확율(probability)로서 기본값은 0.5입니다.
 
-Output은 Json 형태로 전달되며 기본 포맷은 아래와 같습니다.
 
-```java
-{
-  "result": [
-    "output text here"
-  ]
-}
-```
-
-## 문서 읽기
+## 문서 읽어서 OpenSearch에 올리기
 
 S3에서 PDF, TXT, CSV 파일을 아래처럼 읽어올 수 있습니다. pdf의 경우에 PyPDF2를 이용하여 PDF파일에서 page 단위로 읽어옵니다. 이때, 불필요한 '\x00', '\x01'은 아래와 같이 제거합니다. 또한 LLM의 token size 제한을 고려하여, 아래와 같이 RecursiveCharacterTextSplitter을 이용하여 chunk 단위로 문서를 나눕니다. 
 
@@ -102,18 +115,6 @@ def load_document(file_type, s3_file_name):
     texts = text_splitter.split_text(new_contents) 
             
     return texts
-```
-
-## 답변하기
-
-VARCO는 User의 요청을 같이 전달하고 응답은 "### Assistant:" 포맷으로 전달되므로, LLM의 응답에서 답변만 골라서 메시지로 전달합니다.
-
-```python
-answer = llm(text)
-print('answer: ', answer)
-
-pos = answer.rfind('### Assistant:\n') + 15
-msg = answer[pos:]
 ```
 
 ## 읽어온 문서를 Document로 저장하기
@@ -151,6 +152,20 @@ pos = summary.rfind('### Assistant:\n') + 15
 msg = summary[pos:]
 ```
 
+
+
+## Query와 관련된 문서의 OpenSearch로 부터 가져오기 
+
+VARCO는 User의 요청을 같이 전달하고 응답은 "### Assistant:" 포맷으로 전달되므로, LLM의 응답에서 답변만 골라서 메시지로 전달합니다.
+
+```python
+answer = llm(text)
+print('answer: ', answer)
+
+pos = answer.rfind('### Assistant:\n') + 15
+msg = answer[pos:]
+```
+
 ### AWS CDK로 인프라 구현하기
 
 [CDK 구현 코드](./cdk-qa-with-rag/README.md)에서는 Typescript로 인프라를 정의하는 방법에 대해 상세히 설명하고 있습니다.
@@ -178,7 +193,12 @@ msg = summary[pos:]
 cdk destroy
 ```
 
-본 실습에서는 VARCO LLM의 endpoint로 "ml.g5.12xlarge"를 사용하고 있으므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 Endpoint Console에 접속해서 Endpoint를 삭제합니다. 마찬가지로 Models과 Endpoint configuration에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
+본 실습에서는 VARCO LLM의 endpoint로 "ml.g5.12xlarge"를 사용하고 있으므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
+
+## 결론
+
+엔씨소프트의 한국어 언어모델인 VARCO LLM과 Amazon OpenSearch를 활용하여 질문과 답변(Question/Answering) 테스크를 수행하는 Chatbot 어플리케이션을 구현하였습니다. 대규모 언어 모델(LLM)을 활용하면 기존 Rule 기반의 Chatbot보다 훨씬 강화된 기능을 제공할 수 있습니다. 대규모 언어모델 확습에 포함되지 못한 특정 영역의 데이터는 Amazon OpenSearch를 통해 보완될수 있으며, 이를 통해 엔터프라이즈 기업과 같이 질문과 답변을 고객에게 제공하는 기업들에 유용하게 사용될 수 있을것으로 보여집니다. 또한 대규모 언어 모델을 개발하는 프레임워크인 LangChain을 VARCO LLM과 연동하는 방법과 Amazon OpenSearch와 관련된 서빙 인프라를 AWS CDK를 활용하여 쉽게 구현할 수 있었습니다. 한국어 대규모 언어 모델은 Chatbot뿐 아니라 향후 다양한 분야에서 유용하게 활용될 수 있을것으로 기대됩니다.
+
 
 
 ## Reference

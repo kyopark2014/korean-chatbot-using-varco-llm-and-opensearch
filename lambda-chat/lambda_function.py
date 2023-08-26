@@ -124,6 +124,9 @@ embeded = embeddings.embed_documents(
 print('embeded length: ', len(embeded))
 print('embeded: ', embeded)
 
+embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
+embedded_query[:5]
+
 
 print('embedding_region: ', embedding_region)
 print('endpoint_embedding: ', endpoint_embedding)

@@ -134,7 +134,8 @@ def load_document(file_type, s3_file_name):
 
 ## 읽어온 문서를 Document로 저장하기
 
-아래와 같이 load_document()를 이용하여 S3로 부터 읽어온 문서를 page 단위로 Document()에 저장합니다. 이때 파일이름과 Chunk의 순서를 가지고 metadata를 아래와 같이 정의합니다. 
+S3로 부터 읽어온 문서를 page 단위로 Document()에 저장합니다. 이때 metadata는 파일이름과 Chunk의 순서를 page로 입력합니다. 
+
 ```python
 texts = load_document(file_type, object)
 docs = []
@@ -171,12 +172,53 @@ msg = summary[pos:]
 
 ## Query와 관련된 문서의 OpenSearch로 부터 가져오기 
 
-VARCO는 User의 요청을 같이 전달하고 응답은 "### Assistant:" 포맷으로 전달되므로, LLM의 응답에서 답변만 골라서 메시지로 전달합니다.
+RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 retriever를 OpenSearch로 만든 vectorstore로 지정하여 similarity search를 수행합니다. 또한 아래와 같이 template를 이용합니다.
 
 ```python
-answer = llm(text)
-print('answer: ', answer)
+from langchain.chains import RetrievalQA
 
+def get_answer_using_template(query, vectorstore):  
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),
+        return_source_documents=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+    result = qa({"query": query})
+    source_documents = result['source_documents']
+
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
+        return result['result']+reference
+    else:
+        return result['result']
+```
+
+RAG에서 Vector 검색에 사용하는 OpenSearch의 query size의 제한을 고려하여 여기서는 1800자 이상의 query에 대해서 아래와 같이 RAG를 적용합니다. 
+
+```python
+if querySize<1800 and enableOpenSearch=='true': 
+  answer = get_answer_using_template(text, vectorstore)
+else:
+  answer = llm(text) 
+```
+
+VARCO LLM의 응답에서 "### Assistant:" 이후를 응답으로 사용하기 위하여 아래와 같이 answer에서 msg를 추출합니다.
+
+```python
 pos = answer.rfind('### Assistant:\n') + 15
 msg = answer[pos:]
 ```

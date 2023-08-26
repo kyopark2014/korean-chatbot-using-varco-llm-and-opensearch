@@ -253,7 +253,7 @@ distribution.addBehavior("/chat", new origins.RestApiOrigin(api), {
 ```
 
 
-Kendra에 파일을 업로드할 수 있도록 도와주는 lambda-upload를 정의합니다.
+Presigned URL을 얻어 올 수 있도록 도와주는 lambda-upload를 정의합니다.
 
 ```java
 const lambdaUpload = new lambda.Function(this, `lambda-upload-for-${projectName}`, {

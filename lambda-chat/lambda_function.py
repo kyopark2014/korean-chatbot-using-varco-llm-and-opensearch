@@ -69,27 +69,7 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-def test_embedding():
-    text1 = "How cute your dog is!"
-    text2 = "Your dog is so cute."
-    text3 = "The mitochondria is the powerhouse of the cell."
 
-    newline, bold, unbold = '\n', '\033[1m', '\033[0m'
-    #endpoint_name = 'jumpstart-dft-embedding-gpt-j-6b-varco'
-        
-    payload = {"text_inputs": [text1, text2, text3]}
-
-    encoded_json = json.dumps(payload).encode('utf-8')
-
-    client = boto3.client('runtime.sagemaker')
-    query_response = client.invoke_endpoint(EndpointName=endpoint_embedding, ContentType='application/json', Body=encoded_json)
-
-    model_predictions = json.loads(query_response['Body'].read())
-    embeddings = model_predictions['embedding']
-    
-    print("embeddings: ", embeddings[0][:5])
-
-test_embedding()
 
 # embedding
 from typing import Dict, List
@@ -112,21 +92,8 @@ embeddings = SagemakerEndpointEmbeddings(
     content_handler = content_handler2,
 )
 
-embeded = embeddings.embed_documents(
-    [
-        "Hi there!",
-        "Oh, hello!",
-        "What's your name?",
-        "My friends call me World",
-        "Hello World!"
-    ]
-)
-print('embeded length: ', len(embeded))
-print('embeded: ', embeded[0][:5])
-
 embedded_query = embeddings.embed_query("What was the name mentioned in the conversation?")
-embedded_query[:5]
-
+print('embeded test: ', embedded_query[0][:5])
 
 print('embedding_region: ', embedding_region)
 print('endpoint_embedding: ', endpoint_embedding)

@@ -290,14 +290,10 @@ def lambda_handler(event, context):
         n = 0
         for i in range(int(length/5+1)):
             docs = []
-
             if n >= length: 
                 break
 
             for j in range(5):
-                print('--> n: ', n)
-                print('j: ', j)
-
                 docs.append(
                     Document(
                         page_content=texts[n],
@@ -308,12 +304,10 @@ def lambda_handler(event, context):
                     )
                 )   
                 n = n+1
-
                 if n >= length: 
                     break
 
-            print('docs[0]: ', docs[0])    
-            print('docs size: ', len(docs))
+            print(f'docs[{n-1}]: {docs[0]}')    
 
             new_vectorstore = OpenSearchVectorSearch(
                 index_name="rag-index-"+userId+'-'+requestId,

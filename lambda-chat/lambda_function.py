@@ -287,7 +287,7 @@ def lambda_handler(event, context):
         length = len(texts)
 
         n = 0
-        for i in range(length/5):
+        for i in range(int(length/5)):
             docs = []
             for j in range(5):
                 print('n: ', n)

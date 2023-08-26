@@ -111,6 +111,7 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
     });  
 
     // OpenSearch
+    let opensearch_url = "";
     const domain = new opensearch.Domain(this, 'Domain', {
       version: opensearch.EngineVersion.OPENSEARCH_2_3,
       
@@ -153,6 +154,8 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
       value: 'https://'+domain.domainEndpoint,
       description: 'The endpoint of OpenSearch Domain',
     });
+
+    opensearch_url = 'https://'+domain.domainEndpoint;
     
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -194,6 +197,7 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
       memorySize: 4096,
       role: roleLambda,
       environment: {
+        opensearch_url: opensearch_url,
         s3_bucket: s3Bucket.bucketName,
         s3_prefix: s3_prefix,
         callLogTableName: callLogTableName,

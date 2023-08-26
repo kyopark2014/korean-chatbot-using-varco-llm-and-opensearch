@@ -122,7 +122,7 @@ def load_document(file_type, s3_file_name):
     new_contents = str(contents).replace("\n"," ") 
     print('length: ', len(new_contents))
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000,chunk_overlap=100)
     texts = text_splitter.split_text(new_contents) 
     print('texts[0]: ', texts[0])
             
@@ -284,13 +284,13 @@ def lambda_handler(event, context):
         # load documents where text, pdf, csv are supported
         texts = load_document(file_type, object) 
 
-        length = len(texts)
-        print('length: ', length)
+        pages = len(texts)
+        print('pages: ', pages)
 
         n = 0
-        for i in range(int(length/5+1)):
+        for i in range(int(pages/5+1)):
             docs = []
-            if n >= length: 
+            if n >= pages: 
                 break
 
             for j in range(5):
@@ -304,7 +304,7 @@ def lambda_handler(event, context):
                     )
                 )   
                 n = n+1
-                if n >= length: 
+                if n >= pages: 
                     break
 
             print(f'docs[{n-1}]: {docs[0]}')    

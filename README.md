@@ -11,6 +11,19 @@
 
 <img src="https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/4d5fe46a-377e-49f4-a57d-6bdbc1b1d35a" width="800">
 
+상세한 Call Flow는 아래와 같습니다.
+
+단계1: 사용자가 Question을 입력하면, Query가 CloudFront와 API Gateway를 거쳐서 Lambda (Chat)에 전달됩니다. 
+
+단계2: Query를 Embedding에 전달하여 Vector로 변환합니다. 여기서는 Embedding을 위하여 [GPT-J Embedding]을 활용하였습니다.
+
+단계3: Vector화된 Query를 OpenSearch에 보내서 Query와 관련된 문서들을 가져옵니다.
+
+단계4: Query와 함께 관계된 문서를 VARCO LLM에 전달하여 응답(response)을 얻습니다.
+
+단계5: DynamoDB에 Call log를 저장합니다.
+
+단계6: 사용자에게 응답으로 결과를 전달합니다.
 
 ## LangChain과 연동하기 
 

@@ -52,6 +52,65 @@ new s3Deploy.BucketDeployment(this, `upload-HTML-for-${projectName}`, {
 });
 ```
 
+
+
+OpenSearch를 위한 Role을 정의합니다.
+
+```java
+const domainName = `${projectName}`
+const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+const resourceArn = `arn:aws:es:${region}:${accountId}:domain/${domainName}/*`
+const OpenSearchPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+});
+const OpenSearchAccessPolicy = new iam.PolicyStatement({
+    resources: [resourceArn],
+    actions: ['es:*'],
+    effect: iam.Effect.ALLOW,
+    principals: [new iam.AnyPrincipal()],
+});  
+```
+
+
+
+아래와 같이 OpenSearch를 정의합니다.
+
+```java
+let opensearch_url = "";
+const domain = new opensearch.Domain(this, 'Domain', {
+    version: opensearch.EngineVersion.OPENSEARCH_2_3,
+
+    domainName: domainName,
+    removalPolicy: cdk.RemovalPolicy.DESTROY,
+    enforceHttps: true,
+    fineGrainedAccessControl: {
+        masterUserName: opensearch_account,
+        masterUserPassword: cdk.SecretValue.unsafePlainText(opensearch_passwd)
+    },
+    capacity: {
+        masterNodes: 3,
+        masterNodeInstanceType: 'm6g.large.search',
+        dataNodes: 3,
+        dataNodeInstanceType: 'r6g.large.search',
+    },
+    accessPolicies: [OpenSearchAccessPolicy],
+    ebs: {
+        volumeSize: 100,
+        volumeType: ec2.EbsDeviceVolumeType.GP3,
+    },
+    nodeToNodeEncryption: true,
+    encryptionAtRest: {
+        enabled: true,
+    },
+    zoneAwareness: {
+        enabled: true,
+        availabilityZoneCount: 3,
+    }
+});
+opensearch_url = 'https://' + domain.domainEndpoint;
+```
+
 CloudFront를 정의합니다.
 
 ```java
@@ -66,36 +125,6 @@ const distribution = new cloudFront.Distribution(this, `cloudfront-for-${project
 });
 ```
 
-Kendra를 위한 Role을 정의하고 Index를 생성합니다. 여기서는 DEVEOPER Edition을 사용하고 있습니다.
-
-```java
-const roleKendra = new iam.Role(this, `role-kendra-for-${projectName}`, {
-    roleName: `role-kendra-for-${projectName}-${region}`,
-    assumedBy: new iam.CompositePrincipal(
-        new iam.ServicePrincipal("kendra.amazonaws.com")
-    )
-});
-const cfnIndex = new kendra.CfnIndex(this, 'MyCfnIndex', {
-    edition: 'DEVELOPER_EDITION',  // ENTERPRISE_EDITION, 
-    name: `reg-kendra-${projectName}`,
-    roleArn: roleKendra.roleArn,
-});
-```
-
-Kendra를 위한 Policy를 생성하여 Role에 추가합니다.
-```java
-const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const kendraResourceArn = `arn:aws:kendra:${region}:${accountId}:index/${cfnIndex.attrId}`
-const kendraPolicy = new iam.PolicyStatement({
-    resources: [kendraResourceArn],
-    actions: ['kendra:*'],
-});
-roleKendra.attachInlinePolicy( // add kendra policy
-    new iam.Policy(this, `kendra-inline-policy-for-${projectName}`, {
-        statements: [kendraPolicy],
-    }),
-);      
-```
 
 Chat에 사용할 Lambda의 Role을 정의합니다.
 
@@ -103,8 +132,7 @@ Chat에 사용할 Lambda의 Role을 정의합니다.
 const roleLambda = new iam.Role(this, `role-lambda-chat-for-${projectName}`, {
     roleName: `role-lambda-chat-for-${projectName}`,
     assumedBy: new iam.CompositePrincipal(
-        new iam.ServicePrincipal("lambda.amazonaws.com"),
-        new iam.ServicePrincipal("kendra.amazonaws.com")
+        new iam.ServicePrincipal("lambda.amazonaws.com")
     )
 });
 roleLambda.addManagedPolicy({
@@ -117,20 +145,6 @@ roleLambda.attachInlinePolicy( // add kendra policy
 );
 ```
 
-PassRole을 정의합니다.
-
-```java
-const passRoleResourceArn = roleLambda.roleArn;
-const passRolePolicy = new iam.PolicyStatement({
-    resources: [passRoleResourceArn],
-    actions: ['iam:PassRole'],
-});
-roleLambda.attachInlinePolicy( // add pass role policy
-    new iam.Policy(this, `pass-role-of-kendra-for-${projectName}`, {
-        statements: [passRolePolicy],
-    }),
-);
-```
 
 lambda-chat을 아래와 같이 정의하고 필요한 권한을 부여합니다.
 
@@ -143,13 +157,18 @@ const lambdaChatApi = new lambda.DockerImageFunction(this, `lambda-chat-for-${pr
     memorySize: 4096,
     role: roleLambda,
     environment: {
+        opensearch_url: opensearch_url,
         s3_bucket: s3Bucket.bucketName,
         s3_prefix: s3_prefix,
         callLogTableName: callLogTableName,
-        varico_region: varico_region,
+        varco_region: varco_region,
         endpoint_name: endpoint_name,
-        kendraIndex: cfnIndex.attrId,
-        roleArn: roleLambda.roleArn,
+        opensearch_account: opensearch_account,
+        opensearch_passwd: opensearch_passwd,
+        embedding_region: embedding_region,
+        endpoint_embedding: endpoint_embedding,
+        enableOpenSearch: enableOpenSearch,
+        enableReference: enableReference
     }
 });
 lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));

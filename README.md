@@ -1,4 +1,4 @@
-![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0585fc07-3baf-4b1c-9cc9-567e97f6a4be)# VARCO LLM과 OpenSearch를 이용하여 한국어 Chatbot 만들기
+# VARCO LLM과 OpenSearch를 이용하여 한국어 Chatbot 만들기
 
 여기서는 [VARCO LLM](https://ncsoft.github.io/ncresearch/varco-llm/)와 [Amazon OpenSearch](https://docs.aws.amazon.com/ko_kr/opensearch-service/latest/developerguide/what-is.html)를 이용하여 Question/Answering을 위한 한국어 Chatbot을 구현하고자 합니다. VARCO LLM은 엔씨소프트(NC SOFT)에서 제공하는 대용량 언어 모델(LLM)입니다. VARCO LLM KO-13B-IST는 VARCO LLM KO-13B-FM의 파인튜닝 모델로서 Question and Answering, Summarization등 다양한 태스크에 활용할 수 있으며, [Amazon SageMaker](https://aws.amazon.com/marketplace/seller-profile?id=seller-tkuvdeznmi2w4)를 이용하여 쉽게 배포하여 사용할 수 있습니다.  
 
@@ -304,7 +304,7 @@ msg = answer[pos:]
 ![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/f1c96a77-4913-42d8-99cb-8b1bc7803a83)
 
 
-
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0585fc07-3baf-4b1c-9cc9-567e97f6a4be)
 
 
 ## 리소스 정리하기

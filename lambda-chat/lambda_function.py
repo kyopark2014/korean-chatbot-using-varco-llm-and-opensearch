@@ -298,6 +298,7 @@ def lambda_handler(event, context):
             )        
         print('docs[0]: ', docs[0])    
         print('docs size: ', len(docs))
+        print('opensearch_url: ', opensearch_url)
 
         new_vectorstore = OpenSearchVectorSearch(
             index_name="rag-index-"+userId+'-'+requestId,

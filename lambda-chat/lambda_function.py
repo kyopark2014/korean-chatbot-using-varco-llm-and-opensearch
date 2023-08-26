@@ -282,19 +282,32 @@ def lambda_handler(event, context):
         print('file_type: ', file_type)
             
         # load documents where text, pdf, csv are supported
-        texts = load_document(file_type, object)
+        texts = load_document(file_type, object) 
 
         docs = []
-        for i in range(len(texts)):
-            docs.append(
-                Document(
-                    page_content=texts[i],
-                    metadata={
-                        'name': object,
-                        'page':i+1
-                    }
-                )
-            )        
+        if len(texts) < 5:
+            for i in range(len(texts)):
+                docs.append(
+                    Document(
+                        page_content=texts[i],
+                        metadata={
+                            'name': object,
+                            'page':i+1
+                        }
+                    )
+                )   
+
+        else:
+            for i in range(5):
+                docs.append(
+                    Document(
+                        page_content=texts[i],
+                        metadata={
+                            'name': object,
+                            'page':i+1
+                        }
+                    )
+                )        
         print('docs[0]: ', docs[0])    
         print('docs size: ', len(docs))
         print('opensearch_url: ', opensearch_url)

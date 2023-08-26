@@ -285,27 +285,31 @@ def lambda_handler(event, context):
         texts = load_document(file_type, object) 
 
         length = len(texts)
+        print('length: ', length)
 
         n = 0
-        for i in range(int(length/5)):
+        for i in range(length):
             docs = []
-            for j in range(5):
-                print('n: ', n)
+
+            if length-i > 5: 
+                n = 5
+            else:
+                n = length-i
+            print('n: ', n)
+
+            for j in n:
+                print(' i: ', i)
 
                 docs.append(
                     Document(
-                        page_content=texts[n],
+                        page_content=texts[i],
                         metadata={
                             'name': object,
-                            'page': n+1
+                            'page': i+1
                         }
                     )
                 )   
-                n = n+1
-                if n > length:
-                    break
-            if n > length:
-                break
+                i = i+1
 
             print('docs[0]: ', docs[0])    
             print('docs size: ', len(docs))

@@ -217,7 +217,7 @@ new_vectorstore.add_documents(docs)
 
 ### OpenSearch를 이용하여 Query하기
 
-RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 OpenSearch로 구성된 vectorstore를 retriever를 지정합니다. 이때 search_type을 similarity search로 지정하여 문서를 3개까지 가져오도록 설정하였습니다. RAG의 문서와 함께 template를 사용하여 정확도를 높입니다.
+RAG를 수행하는 get_answer_using_template()은 아래와 같습니다. [RetrievalQA](https://api.python.langchain.com/en/latest/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html?highlight=retrievalqa#langchain.chains.retrieval_qa.base.RetrievalQA)은 아래처럼 OpenSearch로 구성된 vectorstore를 retriever로 지정합니다. 이때 search_type을 similarity search로 지정하여 관련 문서를 3개까지 가져오도록 설정하였습니다. RAG의 문서와 함께 template를 사용하여 정확도를 높입니다.
 
 ```python
 from langchain.chains import RetrievalQA
@@ -304,14 +304,14 @@ msg = answer[pos:]
 cdk destroy
 ```
 
-본 실습에서는 VARCO LLM의 endpoint와 embedding으로 "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용하고 있ㅇ므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
+본 실습에서는 VARCO LLM의 endpoint와 embedding으로 "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용하고 있으므로, 더이상 사용하지 않을 경우에 반드시 삭제하여야 합니다. 특히 cdk destroy 명령어로 Chatbot만 삭제할 경우에 SageMaker Endpoint가 유지되어 지속적으로 비용이 발생될 수 있습니다. 이를 위해 [Endpoint Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpoints)에 접속해서 Endpoint를 삭제합니다. 마찬가지로 [Models](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/models)과 [Endpoint configuration](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/endpointConfig)에서 설치한 VARCO LLM의 Model과 Configuration을 삭제합니다.
 
 
 
 
 ## 결론
 
-엔씨소프트의 한국어 언어모델인 VARCO LLM과 Amazon OpenSearch를 활용하여 질문과 답변(Question/Answering) 테스크를 수행하는 Chatbot 어플리케이션을 구현하였습니다. 대규모 언어 모델(LLM)을 활용하면 기존 Rule 기반의 Chatbot보다 훨씬 강화된 기능을 제공할 수 있습니다. 대규모 언어모델 확습에 포함되지 못한 특정 영역의 데이터는 Amazon OpenSearch를 통해 보완될수 있으며, 이를 통해 엔터프라이즈 기업과 같이 질문과 답변을 고객에게 제공하는 기업들에 유용하게 사용될 수 있을것으로 보여집니다. 또한 대규모 언어 모델을 개발하는 프레임워크인 LangChain을 VARCO LLM과 연동하는 방법과 Amazon OpenSearch와 관련된 서빙 인프라를 AWS CDK를 활용하여 쉽게 구현할 수 있었습니다. 한국어 대규모 언어 모델은 Chatbot뿐 아니라 향후 다양한 분야에서 유용하게 활용될 수 있을것으로 기대됩니다.
+엔씨소프트의 한국어 언어모델인 VARCO LLM과 Amazon OpenSearch를 활용하여 질문과 답변(Question/Answering) 테스크를 수행하는 Chatbot 어플리케이션을 구현하였습니다. 대규모 언어 모델(LLM)을 활용하면 기존 Rule 기반의 Chatbot보다 훨씬 강화된 기능을 제공할 수 있습니다. 대규모 언어모델 확습에 포함되지 못한 특정 영역의 데이터는 Amazon OpenSearch를 통해 보완될수 있으며, 이를 통해 질문과 답변을 chatbot으로 제공하려는 기업들이 유용하게 사용될 수 있을것으로 보여집니다. 또한 대규모 언어 모델을 개발하는 프레임워크인 LangChain을 VARCO LLM과 연동하는 방법과 Amazon OpenSearch와 관련된 서빙 인프라를 AWS CDK를 활용하여 쉽게 구현할 수 있었습니다. 한국어 대규모 언어 모델은 Chatbot뿐 아니라 향후 다양한 분야에서 유용하게 활용될 수 있을것으로 기대됩니다.
 
 
 

@@ -106,11 +106,34 @@ VARCO LLM의 parameter는 아래와 같습니다.
 
 ### Embedding
 
+문서를 OpenSearch에 넣을때와 Question을 이용해 OpenSearch에 질의를 할때에 Vector로 string을 변환하기 위해서는 embedding function이 필요합니다. 여기서는 [GPT-J 6B Embedding FP16](https://aws.amazon.com/ko/blogs/machine-learning/fine-tune-gpt-j-using-an-amazon-sagemaker-hugging-face-estimator-and-the-model-parallel-library/)을 이용하여 embedding을 수행합니다. GPT-J embedding은 semantic search와 question and answering 같은 text generation에 유용하게 이용할 수 있습니다. GPT-J embedding은 SagMaker JumpStart를 이용해 배포하므로 [SageMaker Endpoint Embeddings](https://python.langchain.com/docs/integrations/text_embedding/sagemaker-endpoint)을 이용하여 아래와 같이 정의합니다.
 
+```python
+from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
+from typing import Dict, List
+class ContentHandler2(EmbeddingsContentHandler):
+    content_type = "application/json"
+    accepts = "application/json"
+
+    def transform_input(self, inputs: List[str], model_kwargs: Dict) -> bytes:
+        input_str = json.dumps({ "text_inputs": inputs, ** model_kwargs})
+        return input_str.encode("utf-8")
+
+    def transform_output(self, output: bytes) -> List[List[float]]:
+        response_json = json.loads(output.read().decode("utf-8"))
+        return response_json["embedding"]
+
+content_handler2 = ContentHandler2()
+embeddings = SagemakerEndpointEmbeddings(
+    endpoint_name = endpoint_embedding,
+    region_name = aws_region,
+    content_handler = content_handler2,
+)
+```
 
 ### OpenSearch를 이용하여 Vector Store 구성하기
 
-LangChain의 [OpenSearchVectorSearch](https://api.python.langchain.com/en/latest/vectorstores/langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch.html)을 이용하여 vectorstore를 정의합니다. 여기서는 개인화된 RAG를 적용하기 위하여 OpenSearch의 index에 [UUID](https://www.cockroachlabs.com/blog/what-is-a-uuid/)로 구성된 userId를 추가하였습니다. 
+LangChain의 [OpenSearchVectorSearch](https://api.python.langchain.com/en/latest/vectorstores/langchain.vectorstores.opensearch_vector_search.OpenSearchVectorSearch.html)을 이용하여 vectorstore를 정의합니다. 여기서는 개인화된 RAG를 적용하기 위하여 OpenSearch의 index에 [UUID](https://www.cockroachlabs.com/blog/what-is-a-uuid/)로 구성된 userId를 추가하였습니다. 또한 embedding_function으로 GPT-J embedding을 지정하였습니다.
 
 ```python
 vectorstore = OpenSearchVectorSearch(

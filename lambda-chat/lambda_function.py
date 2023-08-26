@@ -288,7 +288,7 @@ def lambda_handler(event, context):
         print('length: ', length)
 
         n = 0
-        for i in range(int(length/5)):
+        for i in range(int(length/5+1)):
             docs = []
 
             if n > length: 

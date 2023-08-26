@@ -284,43 +284,41 @@ def lambda_handler(event, context):
         # load documents where text, pdf, csv are supported
         texts = load_document(file_type, object) 
 
-        docs = []
-        if len(texts) < 5:
-            for i in range(len(texts)):
+        length = len(texts)
+
+        n = 0
+        for i in range(length/5):
+            docs = []
+            for j in range(5):
+                print('n: ', n)
+
                 docs.append(
                     Document(
-                        page_content=texts[i],
+                        page_content=texts[n],
                         metadata={
                             'name': object,
-                            'page':i+1
+                            'page': n+1
                         }
                     )
                 )   
+                n = n+1
+                if n > length:
+                    break
+            if n > length:
+                break
 
-        else:
-            for i in range(5):
-                docs.append(
-                    Document(
-                        page_content=texts[i],
-                        metadata={
-                            'name': object,
-                            'page':i+1
-                        }
-                    )
-                )        
-        print('docs[0]: ', docs[0])    
-        print('docs size: ', len(docs))
-        print('opensearch_url: ', opensearch_url)
+            print('docs[0]: ', docs[0])    
+            print('docs size: ', len(docs))
 
-        new_vectorstore = OpenSearchVectorSearch(
-            index_name="rag-index-"+userId+'-'+requestId,
-            is_aoss = False,
-            #engine="faiss",  # default: nmslib
-            embedding_function = embeddings,
-            opensearch_url = opensearch_url,
-            http_auth=(opensearch_account, opensearch_passwd),
-        )
-        new_vectorstore.add_documents(docs)   
+            new_vectorstore = OpenSearchVectorSearch(
+                index_name="rag-index-"+userId+'-'+requestId,
+                is_aoss = False,
+                #engine="faiss",  # default: nmslib
+                embedding_function = embeddings,
+                opensearch_url = opensearch_url,
+                http_auth=(opensearch_account, opensearch_passwd),
+            )
+            new_vectorstore.add_documents(docs)   
 
         # summerization to show the document        
         docs = [

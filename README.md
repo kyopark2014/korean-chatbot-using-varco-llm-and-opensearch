@@ -17,7 +17,7 @@
 
 단계1: 사용자가 Question을 입력하면, Query가 CloudFront와 API Gateway를 거쳐서 Lambda (Chat)에 전달됩니다. 
 
-단계2: Query를 Embedding에 전달하여 Vector로 변환합니다. 여기서는 Embedding을 위하여 [GPT-J Embedding]을 활용하였습니다.
+단계2: Query를 Embedding에 전달하여 Vector로 변환합니다. 여기서는 Embedding을 위하여 "GPT-J Embedding"을 이용합니다.
 
 단계3: Vector화된 Query를 OpenSearch에 보내서 Query와 관련된 문서들을 가져옵니다.
 

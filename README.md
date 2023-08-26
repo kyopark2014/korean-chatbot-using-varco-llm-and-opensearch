@@ -27,7 +27,9 @@
 
 ## LangChain과 연동하기 
 
-LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되며 이때의 입출력의 형태는 아래와 같습니다. 먼저, VARCO LLM의 Input형태는 아래와 같습니다.
+LangChain은 LLM application의 개발을 도와주는 Framework으로 Question anc Answering, Summarization등 다양한 task에 맞게 Chain등을 활용하여 편리하게 개발할 수 있습니다. VARCO LLM은 SageMaker Endpoint로 배포되며 이때의 입출력의 형태는 아래와 같습니다. 
+
+VARCO LLM의 Input형태는 아래와 같습니다.
 
 ```java
 {

@@ -290,18 +290,18 @@ msg = answer[pos:]
 
 ### 실행결과
 
-아래와 같이 "Kendra에 대해 설명해줘"라고 질문을 하였습니다. VARCO LLM에서 학습되지 않은 경우에는 아래처럼 기대와 다른 정보를 전달합니다.
+아래와 같이 "Kendra에 대해 설명해줘."라고 질문을 하였습니다. VARCO LLM에서 학습되지 않은 경우에는 아래처럼 기대와 다른 정보를 전달합니다.
 
-![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/320d9acc-3533-456d-bba1-2362108231d5)
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/78d1f7df-a2a7-406e-827e-6b7fe590aca5)
 
 [Amazon_Kendra.pdf](./Amazon_Kendra.pdf)을 다운받은 후에 아래 채팅장의 파일버튼을 선택하여 업로드합니다. 이후 Kendra에 등록이 되고 아래와 같이 요약(summarization) 결과를 보여줍니다. Amazon_Kendra.pdf는 Kendra 서비스에 대한 소개자료입니다.
 
-![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/0f56a282-8440-4928-9fde-ac99154b76ea)
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/1a253a3f-4118-44e8-b5e2-9ffc1efd8798)
 
 
-이제 다시 "Kendra에 대해 설명해줘"라고 질문을 하면 업로드한 Amazon_Kendra.pdf을 참조하여 아래와 같이 Kendra에 대한 정확한 응답을 얻을 수 있습니다.
+이제 다시 "Kendra에 대해 설명해줘."라고 질문을 하면 업로드한 Amazon_Kendra.pdf을 참조하여 아래와 같이 Kendra에 대한 정확한 응답을 얻을 수 있습니다.
 
-![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/f1c96a77-4913-42d8-99cb-8b1bc7803a83)
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/9590cc1e-2815-4da2-88bf-67a06e40a311)
 
 
 ## 리소스 정리하기

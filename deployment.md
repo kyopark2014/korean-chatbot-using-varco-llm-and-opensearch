@@ -19,16 +19,30 @@
 
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-kendra/assets/52392004/7b21b4e3-6fc0-4803-8adc-64bc07d1ce40)
 
+아래와 같이 [Endpoint Name]과 [Enpoint configuration name]을 "endpoint-varco-llm-ko-13b-ist-1"로 입력합니다. 
 
-[Endpoint name]과 [Enpoint configuration]에서 아래와 같이 "endpoint-varco-llm-ko-13b-ist-1"로 입력합니다. 
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm/assets/52392004/afb94242-2f3c-45ee-92ab-7134db87dfda)
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/c0a6a862-7fc8-4391-b10b-ade001cd8ba0)
 
-[Endpoint configuration name]에 "endpoint-varco-llm-ko-13b-ist-1"을 입력한 후에 아래에서 [Create endpoint configuration]을 선택합니다. 
 
-이후 [Select endpoint configuration]을 선택합니다. 
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm/assets/52392004/5aba1f72-d86e-46f3-b17b-700f07aed787)
+아래로 스크롤하여 [Variants] - [Production]에서 아래와 같이 [Create production variant]을 선택합니다.
+
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/4b212253-b85d-4e02-bb45-341839b36833)
+
+이후 [Add model]에서 "varco-llm-ko-13b-ist-1"을 선택한 후에 [Save]를 선택합니다. 이후 아래와 같이 [Edit]를 선택합니다.
+
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/316e9319-3d78-4744-9c56-4a3bc3e935ed)
+
+이후 아래와 같이 [Instance type]을 "ml.g5.12xlarge"로 선택하고 [Save]를 선택합니다.
+
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/85d13822-59e2-4cdc-89d8-06e1c1d694da)
+
+이후 아래로 스크롤하여 [Create endpoint configuration]을 선택합니다. 
+
+Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit]을 선택합니다.
+
+
 
 ## Embedding
 

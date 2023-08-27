@@ -52,9 +52,6 @@ Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit
 ![noname](https://github.com/kyopark2014/Llama2-chatbot-with-vector-store/assets/52392004/80a24a19-3f28-4af0-b316-335df23f2bdf)
 
 
-
-
-
 ## CDK를 이용한 인프라 설치하기
 
 여기서는 [Cloud9](https://aws.amazon.com/ko/cloud9/)에서 [AWS CDK](https://aws.amazon.com/ko/cdk/)를 이용하여 인프라를 설치합니다.

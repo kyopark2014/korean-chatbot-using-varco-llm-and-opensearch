@@ -51,7 +51,7 @@ Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit
 ![noname](https://github.com/kyopark2014/Llama2-chatbot-with-vector-store/assets/52392004/80a24a19-3f28-4af0-b316-335df23f2bdf)
 
 
-
+<!--
 
 ## CDK를 이용한 인프라 설치하기
 
@@ -65,7 +65,7 @@ Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit
 
 ![noname](https://github.com/kyopark2014/chatbot-based-on-Falcon-FM/assets/52392004/b7d0c3c0-3e94-4126-b28d-d269d2635239)
 
-<!--
+
 3) EBS 크기 변경
 
 아래와 같이 스크립트를 다운로드 합니다. 

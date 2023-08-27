@@ -3,8 +3,6 @@
 
 ## LLM과 Embedding Endpoint 설치하기
 
-### LLM
-
 여기서는 VARCO LLM을 설치하기 위하여  SageMaker JumbStart에서 Oregon(us-west-2) 리전을 이용합니다. [AWS marketplace](https://aws.amazon.com/marketplace)에 접속하여 "VARCO"로 검색합니다. 여기서 가장 최신 버전의 "VARCO LLM KO-13B-IST"을 선택합니다. 이후 아래와 같이 [Continue to Subscribe]를 선택하고, 다시 [Continue to configuration]을 선택하여 Subscribe를 합니다. 
 
 ![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/aa8e1c9f-383e-4ad1-8a5c-af784b21e6cf)

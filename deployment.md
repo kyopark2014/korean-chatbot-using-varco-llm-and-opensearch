@@ -24,6 +24,7 @@
 
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/c0a6a862-7fc8-4391-b10b-ade001cd8ba0)
 
+<!--
 
 
 아래로 스크롤하여 [Variants] - [Production]에서 아래와 같이 [Create production variant]을 선택합니다.
@@ -42,7 +43,7 @@
 
 Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit]을 선택합니다.
 
-<!--
+
 
 ## Embedding
 

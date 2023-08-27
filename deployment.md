@@ -47,7 +47,6 @@
 Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit]을 선택합니다.
 
 
-<!--
 ## Embedding
 
 [SageMaker Console](https://us-west-2.console.aws.amazon.com/sagemaker/home?region=us-west-2#/studio)에서 SageMaker Studio를 실행한 후에, SageMaker JumpStart에서 "GPT-J 6B Embedding FP16"를 고른후에 Deploy를 선택합니다. 설치가 되면 "jumpstart-dft-hf-textembedding-gpt-j-6b-fp16"와 같이 Endpoint가 생성됩니다.
@@ -56,6 +55,8 @@ Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit
 
 
 
+
+<!--
 
 ## CDK를 이용한 인프라 설치하기
 

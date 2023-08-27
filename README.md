@@ -283,7 +283,7 @@ msg = answer[pos:]
 
 - [AWS Account 생성](https://repost.aws/ko/knowledge-center/create-and-activate-aws-account)
 
-2) VARCO LLM과 Embedding을 위하여, "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용합니다. [Service Quotas - AWS services - Amazon SageMaker](https://us-west-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)에서 "ml.g5.12xlarge for endpoint usage"와 "ml.g5.2xlarge for endpoint usage"가 최소 1개 이상이 되도록 설정합니다.
+2) VARCO LLM과 Embedding을 위하여, "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용합니다. [Service Quotas - AWS services - Amazon SageMaker](https://us-west-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)에서 "ml.g5.12xlarge for endpoint usage"와 "ml.g5.2xlarge for endpoint usage"가 각각 최소 1개 이상이 되어야 합니다. 만약 Quota가 없는 경우에 [Request quota increase]을 선택하여 요청합니다.
 
 
 ### CDK를 이용한 인프라 설치

@@ -42,7 +42,7 @@
 
 Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit]을 선택합니다.
 
-
+<!--
 
 ## Embedding
 
@@ -51,7 +51,7 @@ Endpoint configuration 생성이 성공하면, 아래로 스크롤하여 [Submit
 ![noname](https://github.com/kyopark2014/Llama2-chatbot-with-vector-store/assets/52392004/80a24a19-3f28-4af0-b316-335df23f2bdf)
 
 
-<!--
+
 
 ## CDK를 이용한 인프라 설치하기
 

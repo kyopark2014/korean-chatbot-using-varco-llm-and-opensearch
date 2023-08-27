@@ -7,17 +7,19 @@
 
 여기서는 VARCO LLM을 설치하기 위하여  SageMaker JumbStart에서 Oregon(us-west-2) 리전을 이용합니다. [AWS marketplace](https://aws.amazon.com/marketplace)에 접속하여 "VARCO"로 검색합니다. 여기서 가장 최신 버전의 "VARCO LLM KO-13B-IST"을 선택합니다. 이후 아래와 같이 [Continue to Subscribe]를 선택하고, 다시 [Continue to configuration]을 선택하여 Subscribe를 합니다. 
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/958e7832-6935-4329-b887-7950f01c8e78)
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/aa8e1c9f-383e-4ad1-8a5c-af784b21e6cf)
 
-<!--
 이후 아래와 같이 [Available launch methods]로 [SageMaker console]을 선택한 다음에 아래로 스크롤하여 [View in Amazon SageMaker]를 선택합니다.
 
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm/assets/52392004/a024b2bf-e68f-4171-9e44-146b76ea187d)
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/9606ee1a-1531-4f3b-91d4-a4a9fa021ef5)
+
 
 아래와 같이 Model 이름으로 "varco-llm-ko-13b-ist-1"을 입력하고 아래로 스크롤하여 [Next]을 선택합니다.
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/7b21b4e3-6fc0-4803-8adc-64bc07d1ce40)
+
+![image](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/4da77ce8-3693-44fe-a36d-bc21ac622483)
+
 
 아래와 같이 [Endpoint Name]과 [Enpoint configuration name]을 "endpoint-varco-llm-ko-13b-ist-1"로 입력합니다. 
 
@@ -25,6 +27,7 @@
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/c0a6a862-7fc8-4391-b10b-ade001cd8ba0)
 
 
+<!--
 
 
 아래로 스크롤하여 [Variants] - [Production]에서 아래와 같이 [Create production variant]을 선택합니다.

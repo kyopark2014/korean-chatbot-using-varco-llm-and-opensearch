@@ -279,9 +279,11 @@ msg = answer[pos:]
 
 ### 사전 준비 사항
 
-이 솔루션을 사용하기 위해서는 사전에 아래와 같은 준비가 되어야 합니다.
+1) 사전에 아래와 같은 준비가 되어야 합니다.
 
 - [AWS Account 생성](https://repost.aws/ko/knowledge-center/create-and-activate-aws-account)
+
+2) VARCO LLM과 Embedding을 위하여, "ml.g5.12xlarge"와 "ml.g5.2xlarge"를 사용합니다. [[Service Quotas] - [AWS services] - [[Amazon SageMaker]](https://us-west-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)에서 "ml.g5.12xlarge for endpoint usage"와 "ml.g5.2xlarge for endpoint usage"가 최소 1개 이상이 되도록 설정합니다.
 
 
 ### CDK를 이용한 인프라 설치

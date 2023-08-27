@@ -101,10 +101,8 @@ cd korean-chatbot-using-varco-llm-and-opensearch/cdk-varco-opensearch/ && npm in
 LLM과 Embedding에 대한 Endpoint 생성시 얻은 주소로 아래와 같이 "cdk-varco-opensearch/lib/cdk-varco-opensearch-stack.ts"을 업데이트 합니다. Endpoint의 이름을 상기와 동일하게 설정하였다면, 수정없이 다음 단계로 이동합니다. 
 
 
-<!--
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/099f7e52-6bb0-42a0-b982-3d9f7964c0d4)
 
-
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/3681c139-135e-4ee9-81ae-34039d190ef8)
 
 7) CDK 사용을 위해 Bootstraping을 수행합니다.
 
@@ -127,5 +125,5 @@ cdk deploy
 ```
 9) 설치가 완료되면 브라우저에서 아래와 같이 WebUrl를 확인하여 브라우저를 이용하여 접속합니다.
 
-![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/251c045f-0b9a-412f-a2fb-b0a987d8301d)
--->
+![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/4f48430b-2d8f-4809-bce2-7445677df4c7)
+

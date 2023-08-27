@@ -9,7 +9,7 @@
 
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/958e7832-6935-4329-b887-7950f01c8e78)
 
-
+<!--
 이후 아래와 같이 [Available launch methods]로 [SageMaker console]을 선택한 다음에 아래로 스크롤하여 [View in Amazon SageMaker]를 선택합니다.
 
 
@@ -24,7 +24,7 @@
 
 ![noname](https://github.com/kyopark2014/korean-chatbot-using-varco-llm-and-opensearch/assets/52392004/c0a6a862-7fc8-4391-b10b-ade001cd8ba0)
 
-<!--
+
 
 
 아래로 스크롤하여 [Variants] - [Production]에서 아래와 같이 [Create production variant]을 선택합니다.

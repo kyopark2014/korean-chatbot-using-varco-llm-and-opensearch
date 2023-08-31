@@ -69,6 +69,12 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
+# turn verbose to true to see the full logs and documents
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+
+memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
 # embedding
 from typing import Dict, List
 class ContentHandler2(EmbeddingsContentHandler):
@@ -163,6 +169,56 @@ def get_reference(docs):
     
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
+
+def get_answer_using_template_with_history(query, vectorstore):  
+    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+    {context}
+
+    Question: {question}
+    Assistant:"""
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+
+    from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+    print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
+
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        chain_type='stuff', # 'refine',
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ), 
+        return_source_documents=True,
+        memory=memory_chain,
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT,
+        verbose=True, 
+        max_tokens_limit=300
+    )
+
+    #qa = RetrievalQA.from_chain_type(
+    #    llm=llm,
+    #    chain_type="stuff",
+    #    retriever=vectorstore.as_retriever(
+    #        search_type="similarity", search_kwargs={"k": 3}
+    #    ),
+    #    return_source_documents=True,
+    #    chain_type_kwargs={"prompt": PROMPT}
+    #)
+    result = qa({"query": query})
+    print('result: ', result)
+    source_documents = result['source_documents']
+    print('source_documents: ', source_documents)
+
+    if len(source_documents)>=1 and enableReference == 'true':
+        reference = get_reference(source_documents)
+        #print('reference: ', reference)
+
+        return result['result']+reference
+    else:
+        return result['result']
+
 
 def get_answer_using_template(query, vectorstore):  
     #relevant_documents = vectorstore.similarity_search(query)

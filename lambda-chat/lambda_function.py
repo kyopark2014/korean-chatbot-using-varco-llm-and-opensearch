@@ -35,6 +35,7 @@ embedding_region = os.environ.get('embedding_region')
 endpoint_embedding = os.environ.get('endpoint_embedding')
 enableOpenSearch = os.environ.get('enableOpenSearch')
 enableReference = os.environ.get('enableReference')
+conversationMode = os.environ.get('conversationMode', 'enabled')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -69,11 +70,14 @@ llm = SagemakerEndpoint(
     content_handler = content_handler
 )
 
-# turn verbose to true to see the full logs and documents
+# conversation retrival chain
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 
 memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
 # embedding
 from typing import Dict, List
@@ -180,9 +184,6 @@ def get_answer_using_template_with_history(query, vectorstore):
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
-
-    from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-    print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
@@ -322,10 +323,17 @@ def lambda_handler(event, context):
             textCount = len(text.split())
             print(f"query size: {querySize}, workds: {textCount}")
 
-            if querySize<1800 and enableOpenSearch=='true': 
-                answer = get_answer_using_template(text, vectorstore)
-            else:
-                answer = llm(text)        
+            if conversationMode == 'enabled':
+                if querySize<1800 and enableOpenSearch=='true': 
+                    answer = get_answer_using_template_with_history(text, vectorstore)
+                else:
+                    #msg = conversation.predict(input=text)   
+                    answer = llm(text)   
+            else: 
+                if querySize<1800 and enableOpenSearch=='true': 
+                    answer = get_answer_using_template(text, vectorstore)
+                else:
+                    answer = llm(text)        
             print('answer: ', answer)
 
             pos = answer.rfind('### Assistant:\n')+15

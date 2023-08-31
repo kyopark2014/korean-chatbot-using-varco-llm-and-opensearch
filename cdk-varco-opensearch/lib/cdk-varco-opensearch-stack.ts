@@ -28,6 +28,7 @@ const endpoint_embedding = 'jumpstart-dft-hf-textembedding-gpt-j-6b-fp16';
 //const endpoint_embedding = 'jumpstart-dft-embedding-gpt-j-6b-varco';
 const enableOpenSearch = 'true'; // for debugging
 const enableReference = 'false';
+const conversationMode = 'enabled'; 
 
 export class CdkVarcoOpensearchStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -208,7 +209,8 @@ export class CdkVarcoOpensearchStack extends cdk.Stack {
         embedding_region: embedding_region,
         endpoint_embedding: endpoint_embedding,
         enableOpenSearch: enableOpenSearch,
-        enableReference: enableReference    
+        enableReference: enableReference,
+        conversationMode: conversationMode
       }
     });     
     lambdaChatApi.grantInvoke(new iam.ServicePrincipal('apigateway.amazonaws.com'));  

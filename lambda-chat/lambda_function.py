@@ -174,27 +174,13 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
-    #condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    #Chat History:
-    #{chat_history}
-    #User: {question}
-    #Assistant:"""
-    
-    condense_template = """아래의 대화 내용을 고려하여 친구처럼 친절하게 대답해줘. 모르면 모른다고 해.
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):      
+    condense_template = """아래의 대화 내용을 고려하여 친구처럼 친절하게 대답해줘. 새로운 질문에만 대답하고, 모르면 모른다고 해.
     
     {chat_history}
     
     User: {question}
-    Assistant:"""
-    
-    #condense_template = """{chat_history}
-
-#새로운 질문으로만 대답하세요.
-
-#User: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
- 
-#Assistant: Question:"""
+    Assistant:"""    
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
@@ -229,19 +215,18 @@ Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
     chat_history_all = chats['history']
     print('chat_history_all: ', chat_history_all)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
+    # use last two chunks of chat history
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000,chunk_overlap=0)
     texts = text_splitter.split_text(chat_history_all) 
 
     pages = len(texts)
     print('pages: ', pages)
 
-    if pages >= 3:
-        chat_history = f"{texts[pages-3]} {texts[pages-2]} {texts[pages-1]}"    
-    elif pages >= 2:
+    if pages >= 2:
         chat_history = f"{texts[pages-2]} {texts[pages-1]}"
     elif pages == 1:
         chat_history = texts[0]
-    else:
+    else:  # 0 page
         chat_history = ""
     print('chat_history:\n ', chat_history)
 

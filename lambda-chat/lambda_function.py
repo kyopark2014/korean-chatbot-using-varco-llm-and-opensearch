@@ -179,11 +179,13 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     #{chat_history}
     #User: {question}
     #Assistant:"""
-    condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    Chat History:
-    {chat_history}
-    User: {question}
-    Assistant:"""
+    condense_template = """{chat_history}
+
+새로운 질문으로만 대답하세요.
+
+Human: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
+
+Assistant: Question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
@@ -203,7 +205,9 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     )
 
     # combine any retrieved documents.
-    prompt_template = """User: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """다음은 User와 Assistant의 친근한 대화입니다. 
+Assistant은 말이 많고 상황에 맞는 구체적인 세부 정보를 많이 제공합니다. 
+Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말합니다.
 
     {context}
 

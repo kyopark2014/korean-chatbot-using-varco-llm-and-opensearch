@@ -218,11 +218,11 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     print('pages: ', pages)
     
     if pages >= 2:
-        chat_history = texts[pages-2]
-        chat_history = chat_history + texts[pages-1]
-    else:
+        chat_history = texts[pages-2] + texts[pages-1]
+    elif pages == 1:
         chat_history = texts[0]
-
+    else:
+        chat_history = ""
     print('chat_history: ', chat_history)
 
     # make a question using chat history

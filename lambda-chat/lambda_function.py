@@ -221,7 +221,7 @@ Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말�
     chat_history_all = chats['history']
     print('chat_history_all: ', chat_history_all)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=600,chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
     texts = text_splitter.split_text(chat_history_all) 
 
     pages = len(texts)

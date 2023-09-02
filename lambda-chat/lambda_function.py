@@ -216,7 +216,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     # combine any retrieved documents.
     prompt_template = """다음은 User와 Assistant의 친근한 대화입니다. 
 Assistant은 말이 많고 상황에 맞는 구체적인 세부 정보를 많이 제공합니다. 
-Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말합니다.
+Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
 
     {context}
 

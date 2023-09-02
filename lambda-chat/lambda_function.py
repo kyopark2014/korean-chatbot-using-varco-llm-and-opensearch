@@ -74,9 +74,9 @@ llm = SagemakerEndpoint(
 )
 
 # memory for retrival docs
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='User', ai_prefix='Assistant')
 # memory for conversation
-chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
+chat_memory = ConversationBufferMemory(human_prefix='User', ai_prefix='Assistant')
 
 # embedding
 from typing import Dict, List
@@ -174,11 +174,16 @@ def get_reference(docs):
     return reference
 
 def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
+    #condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    #Chat History:
+    #{chat_history}
+    #User: {question}
+    #Assistant:"""
     condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Chat History:
     {chat_history}
-    Human: {question}
-    AI:"""
+    User: {question}
+    Assistant:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(
@@ -198,12 +203,12 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     )
 
     # combine any retrieved documents.
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """User: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
     {context}
 
     Question: {question}
-    AI:"""
+    Assistant:"""
     qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
     
     # extract chat history
@@ -223,7 +228,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
         chat_history = texts[0]
     else:
         chat_history = ""
-    print('chat_history: ', chat_history)
+    print('chat_history:\n ', chat_history)
 
     # make a question using chat history
     result = qa({"question": query, "chat_history": chat_history})    
@@ -251,7 +256,7 @@ def get_answer_using_template(query, vectorstore):
     
     #print('length of relevant_documents: ', len(relevant_documents))
     
-    prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    prompt_template = """User: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
     {context}
 

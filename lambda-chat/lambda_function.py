@@ -227,14 +227,9 @@ Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말�
     pages = len(texts)
     print('pages: ', pages)
 
-    if(pages>=3):
-        print('chathistory(page-3):\n ', texts[pages-3])
-    if(pages>=2):    
-        print('chathistory(page-2):\n ', texts[pages-2])
-    if(pages>=1): 
-        print('chathistory(page-1):\n ', texts[pages-1])
-    
-    if pages >= 2:
+    if pages >= 3:
+        chat_history = f"{texts[pages-3]} {texts[pages-2]} {texts[pages-1]}"    
+    elif pages >= 2:
         chat_history = f"{texts[pages-2]} {texts[pages-1]}"
     elif pages == 1:
         chat_history = texts[0]

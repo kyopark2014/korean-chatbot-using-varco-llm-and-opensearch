@@ -193,7 +193,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
 #새로운 질문으로만 대답하세요.
 
 #User: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
-
+ 
 #Assistant: Question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     

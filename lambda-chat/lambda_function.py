@@ -180,13 +180,21 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     #{chat_history}
     #User: {question}
     #Assistant:"""
-    condense_template = """{chat_history}
+    
+    condense_template = """아래의 대화 내용을 고려하여 친구처럼 친절하게 대답해줘. 모르면 모른다고 해.
+    
+    {chat_history}
+    
+    User: {question}
+    Assistant:"""
+    
+    #condense_template = """{chat_history}
 
-새로운 질문으로만 대답하세요.
+#새로운 질문으로만 대답하세요.
 
-User: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
+#User: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
 
-Assistant: Question:"""
+#Assistant: Question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
     
     qa = ConversationalRetrievalChain.from_llm(

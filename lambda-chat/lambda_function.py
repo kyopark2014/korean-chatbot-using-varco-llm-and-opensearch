@@ -180,7 +180,7 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template_with_history(query, chat_memory):  
+def get_answer_using_template_with_history(query, vectorstore, chat_memory):  
     condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
     Chat History:
     {chat_history}
@@ -190,7 +190,9 @@ def get_answer_using_template_with_history(query, chat_memory):
     
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
-        retriever=retriever,         
+        retriever=vectorstore.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        ),       
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
@@ -343,7 +345,7 @@ def lambda_handler(event, context):
 
             if querySize<1800 and enableRAG=='true': 
                 if enableConversationMode == 'true':
-                    answer = get_answer_using_template_with_history(text, chat_memory)
+                    answer = get_answer_using_template_with_history(text, vectorstore, chat_memory)
                 else:
                     answer = get_answer_using_template(text, vectorstore)
             else:
@@ -352,8 +354,8 @@ def lambda_handler(event, context):
 
             pos = answer.rfind('### Assistant:\n')+15
             msg = answer[pos:]    
-
-            chat_memory.save_context({"input": text}, {"output": msg})
+        #print('msg: ', msg)
+        chat_memory.save_context({"input": text}, {"output": msg})
             
     elif type == 'document':
         object = body

@@ -358,10 +358,10 @@ def lambda_handler(event, context):
             msg  = "Reference is disabled"
         elif text == 'enableConversationMode':
             enableConversationMode = 'true'
-            msg  = "onversationMode is enabled"
+            msg  = "conversationMode is enabled"
         elif text == 'disableConversationMode':
             enableConversationMode = 'false'
-            msg  = "onversationMode is disabled"
+            msg  = "conversationMode is disabled"
         elif text == 'enableRAG':
             enableRAG = 'true'
             msg  = "RAG is enabled"

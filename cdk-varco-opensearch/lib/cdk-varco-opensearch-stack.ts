@@ -27,7 +27,7 @@ const embedding_region = "us-west-2";
 const endpoint_embedding = 'jumpstart-dft-hf-textembedding-gpt-j-6b-fp16';
 //const endpoint_embedding = 'jumpstart-dft-embedding-gpt-j-6b-varco';
 const enableReference = 'false';
-const enableConversationMode = 'true'; 
+const enableConversationMode = 'false'; 
 const enableRAG = 'true';
 
 export class CdkVarcoOpensearchStack extends cdk.Stack {

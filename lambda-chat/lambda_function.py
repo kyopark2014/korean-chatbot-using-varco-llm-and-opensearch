@@ -211,15 +211,19 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
     chat_history_all = chats['history']
     print('chat_history_all: ', chat_history_all)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=600,chunk_overlap=0)
     texts = text_splitter.split_text(chat_history_all) 
 
     pages = len(texts)
     print('pages: ', pages)
     
-    for i in range(3):
-        pos = pages-4+i
-        print(f"texts[{pos}]: {texts[pos]}")
+    if pages >= 2:
+        chat_history = texts[pages-2]
+        chat_history = chat_history + texts[pages-1]
+    else:
+        chat_history = texts[0]
+
+    print('chat_history: ', chat_history)
 
     # make a question using chat history
     result = qa({"question": query, "chat_history": chat_history})    

@@ -78,7 +78,7 @@ memory = ConversationBufferMemory(memory_key="chat_history", return_messages=Tru
 # memory for conversation
 chat_memory = ConversationBufferMemory(human_prefix='User', ai_prefix='Assistant')
 
-# embedding
+# embedding 
 from typing import Dict, List
 class ContentHandler2(EmbeddingsContentHandler):
     content_type = "application/json"

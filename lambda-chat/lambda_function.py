@@ -228,7 +228,7 @@ Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말�
     print('pages: ', pages)
 
     if(pages>=3):
-        print('chathistory(page-2):\n ', texts[pages-2])
+        print('chathistory(page-3):\n ', texts[pages-3])
     if(pages>=2):    
         print('chathistory(page-2):\n ', texts[pages-2])
     if(pages>=1): 

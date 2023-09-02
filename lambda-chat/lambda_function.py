@@ -197,7 +197,7 @@ Assistant: Question:"""
         condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
         chain_type='stuff', # 'refine'
         verbose=False, # for logging to stdout
-        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
+        rephrase_question=False,  # to pass the new generated question to the combine_docs_chain
         
         memory=memory,
         #max_tokens_limit=300,

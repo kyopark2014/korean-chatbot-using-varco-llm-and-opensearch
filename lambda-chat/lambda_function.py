@@ -20,6 +20,8 @@ from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.embeddings import SagemakerEndpointEmbeddings
 from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory 
 
 s3 = boto3.client('s3')
 s3_bucket = os.environ.get('s3_bucket') # bucket name
@@ -75,15 +77,6 @@ llm = SagemakerEndpoint(
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
 # memory for conversation
 chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
-
-# conversation retrival chain
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-
-memory_chain = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
-print("CONDENSE_QUESTION_PROMPT: ", CONDENSE_QUESTION_PROMPT.template)
 
 # embedding
 from typing import Dict, List

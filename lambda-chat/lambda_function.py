@@ -151,11 +151,12 @@ def summerize_text(text):
             page_content=text
         )
     ]
-    prompt_template = """Write a concise summary of the following:
-
-    {text}
+    prompt_template = """다음 텍스트를 간결하게 요약하십시오.
+텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
+    
+    TEXT: {text}
                 
-    CONCISE SUMMARY """
+    CONCISE SUMMARY:"""
 
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
@@ -183,7 +184,7 @@ def get_answer_using_template_with_history(query, vectorstore, chat_memory):
 
 새로운 질문으로만 대답하세요.
 
-Human: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
+User: 이전 대화를 고려하여 질문을 어떻게 하시겠습니까?: {question}
 
 Assistant: Question:"""
     CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)

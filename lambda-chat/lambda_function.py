@@ -228,7 +228,7 @@ Assistant은 모른다면 질문에 대한 대답은 솔직히 모른다고 말�
     print('pages: ', pages)
     
     if pages >= 2:
-        chat_history = texts[pages-2] + texts[pages-1]
+        chat_history = f"{texts[pages-2]} {texts[pages-1]}"
     elif pages == 1:
         chat_history = texts[0]
     else:

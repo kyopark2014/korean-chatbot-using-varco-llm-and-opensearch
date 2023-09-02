@@ -35,7 +35,8 @@ embedding_region = os.environ.get('embedding_region')
 endpoint_embedding = os.environ.get('endpoint_embedding')
 enableOpenSearch = os.environ.get('enableOpenSearch')
 enableReference = os.environ.get('enableReference')
-conversationMode = os.environ.get('conversationMode', 'enabled')
+enableConversationMode = os.environ.get('enableConversationMode', 'enabled')
+enableRAG = os.environ.get('enableRAG', 'true')
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -69,6 +70,11 @@ llm = SagemakerEndpoint(
     endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     content_handler = content_handler
 )
+
+# memory for retrival docs
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, input_key="question", output_key='answer', human_prefix='Human', ai_prefix='AI')
+# memory for conversation
+chat_memory = ConversationBufferMemory(human_prefix='Human', ai_prefix='AI')
 
 # conversation retrival chain
 from langchain.chains import ConversationalRetrievalChain
@@ -174,52 +180,56 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template_with_history(query, vectorstore):  
+def get_answer_using_template_with_history(query, chat_memory):  
+    condense_template = """Given the following conversation and a follow up question, answer friendly. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    Chat History:
+    {chat_history}
+    Human: {question}
+    AI:"""
+    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
+    
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        retriever=retriever,         
+        condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
+        chain_type='stuff', # 'refine'
+        verbose=False, # for logging to stdout
+        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
+        
+        memory=memory,
+        #max_tokens_limit=300,
+        return_source_documents=True, # retrieved source
+        return_generated_question=False, # generated question
+    )
+
+    # combine any retrieved documents.
     prompt_template = """Human: Use the following pieces of context to provide a concise answer to the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
     {context}
 
     Question: {question}
-    Assistant:"""
-    PROMPT = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"]
-    )
+    AI:"""
+    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
+    
+    # extract chat history
+    chats = chat_memory.load_memory_variables({})
+    chat_history = chats['history']
+    print('chat_history: ', chat_history)
 
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=llm, 
-        chain_type='stuff', # 'refine',
-        retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
-        ), 
-        return_source_documents=True,
-        memory=memory_chain,
-        condense_question_prompt=CONDENSE_QUESTION_PROMPT,
-        verbose=True, 
-        max_tokens_limit=300
-    )
-
-    #qa = RetrievalQA.from_chain_type(
-    #    llm=llm,
-    #    chain_type="stuff",
-    #    retriever=vectorstore.as_retriever(
-    #        search_type="similarity", search_kwargs={"k": 3}
-    #    ),
-    #    return_source_documents=True,
-    #    chain_type_kwargs={"prompt": PROMPT}
-    #)
-    result = qa({"query": query})
-    print('result: ', result)
+    # make a question using chat history
+    result = qa({"question": query, "chat_history": chat_history})    
+    print('result: ', result)    
+    
+    # get the reference
     source_documents = result['source_documents']
     print('source_documents: ', source_documents)
 
     if len(source_documents)>=1 and enableReference == 'true':
         reference = get_reference(source_documents)
         #print('reference: ', reference)
-
-        return result['result']+reference
+        return result['answer']+reference
     else:
-        return result['result']
-
+        return result['answer']
 
 def get_answer_using_template(query, vectorstore):  
     #relevant_documents = vectorstore.similarity_search(query)
@@ -284,7 +294,8 @@ def lambda_handler(event, context):
     body = event['body']
     print('body: ', body)
 
-    global llm, vectorstore, embeddings, enableOpenSearch, enableReference
+    global llm, vectorstore, embeddings
+    global enableReference, enableRAG, enableConversationMode
 
     vectorstore = OpenSearchVectorSearch(
         # index_name = "rag-index-*", // all
@@ -302,42 +313,47 @@ def lambda_handler(event, context):
     
     if type == 'text':
         text = body
+        
+        querySize = len(text)
+        print('query size: ', querySize)
+
+        textCount = len(text.split())
+        print(f"query size: {querySize}, workds: {textCount}")
 
          # debugging
-        if text == 'enableOpenSearch':
-            enableOpenSearch = 'true'
-            msg  = "OpenSearch is enabled"
-        elif text == 'disableOpenSearch':
-            enableOpenSearch = 'false'
-            msg  = "OpenSearch is disabled"
-        elif text == 'enableReference':
+        if text == 'enableReference':
             enableReference = 'true'
             msg  = "Referece is enabled"
         elif text == 'disableReference':
             enableReference = 'false'
             msg  = "Reference is disabled"
+        elif text == 'enableConversationMode':
+            enableConversationMode = 'true'
+            msg  = "onversationMode is enabled"
+        elif text == 'disableConversationMode':
+            enableConversationMode = 'false'
+            msg  = "onversationMode is disabled"
+        elif text == 'enableRAG':
+            enableRAG = 'true'
+            msg  = "RAG is enabled"
+        elif text == 'disableRAG':
+            enableRAG = 'false'
+            msg  = "RAG is disabled"
         else:
-            querySize = len(text)
-            print('query size: ', querySize)
 
-            textCount = len(text.split())
-            print(f"query size: {querySize}, workds: {textCount}")
-
-            if conversationMode == 'enabled':
-                if querySize<1800 and enableOpenSearch=='true': 
-                    answer = get_answer_using_template_with_history(text, vectorstore)
+            if querySize<1800 and enableRAG=='true': 
+                if enableConversationMode == 'true':
+                    answer = get_answer_using_template_with_history(text, chat_memory)
                 else:
-                    #msg = conversation.predict(input=text)   
-                    answer = llm(text)   
-            else: 
-                if querySize<1800 and enableOpenSearch=='true': 
                     answer = get_answer_using_template(text, vectorstore)
-                else:
-                    answer = llm(text)        
+            else:
+                answer = llm(text)   
             print('answer: ', answer)
 
             pos = answer.rfind('### Assistant:\n')+15
             msg = answer[pos:]    
+
+            chat_memory.save_context({"input": text}, {"output": msg})
             
     elif type == 'document':
         object = body

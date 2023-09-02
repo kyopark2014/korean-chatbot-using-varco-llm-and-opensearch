@@ -156,7 +156,7 @@ def summerize_text(text):
     
     TEXT: {text}
                 
-    CONCISE SUMMARY:"""
+    SUMMARY:"""
 
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
@@ -426,11 +426,12 @@ def lambda_handler(event, context):
         ]
         
         # summerization to show the document
-        prompt_template = """Write a concise summary of the following:
-
-        {text}
+        prompt_template = """다음 텍스트를 간결하게 요약하십시오.
+텍스트의 요점을 다루는 글머리 기호로 응답을 반환합니다.
+    
+        TEXT: {text}
                 
-        CONCISE SUMMARY """
+        SUMMARY:"""
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
         chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)

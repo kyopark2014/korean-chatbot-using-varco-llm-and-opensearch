@@ -20,7 +20,6 @@ from langchain.vectorstores import OpenSearchVectorSearch
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.embeddings import SagemakerEndpointEmbeddings
 from langchain.embeddings.sagemaker_endpoint import EmbeddingsContentHandler
-from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory 
 
 s3 = boto3.client('s3')
@@ -37,7 +36,6 @@ embedding_region = os.environ.get('embedding_region')
 endpoint_embedding = os.environ.get('endpoint_embedding')
 enableOpenSearch = os.environ.get('enableOpenSearch')
 enableReference = os.environ.get('enableReference')
-enableConversationMode = os.environ.get('enableConversationMode', 'enabled')
 enableRAG = os.environ.get('enableRAG', 'true')
 
 class ContentHandler(LLMContentHandler):
@@ -174,77 +172,6 @@ def get_reference(docs):
         reference = reference + (str(page)+'page in '+name+'\n')
     return reference
 
-def get_answer_using_template_with_history(query, vectorstore, chat_memory):      
-    condense_template = """아래의 대화 내용을 고려하여 친구처럼 친절하게 대답해줘. 새로운 질문에만 대답하고, 모르면 모른다고 해.
-    
-    {chat_history}
-    
-    User: {question}
-    Assistant:"""    
-    CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(condense_template)
-    
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=llm, 
-        retriever=vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 3}
-        ),       
-        condense_question_prompt=CONDENSE_QUESTION_PROMPT, # chat history and new question
-        chain_type='stuff', # 'refine'
-        verbose=False, # for logging to stdout
-        rephrase_question=True,  # to pass the new generated question to the combine_docs_chain
-        
-        memory=memory,
-        #max_tokens_limit=300,
-        return_source_documents=True, # retrieved source
-        return_generated_question=False, # generated question
-    )
-
-    # combine any retrieved documents.
-    prompt_template = """다음은 User와 Assistant의 친근한 대화입니다. 
-Assistant은 말이 많고 상황에 맞는 구체적인 세부 정보를 많이 제공합니다. 
-Assistant는 모르는 질문을 받으면 솔직히 모른다고 말합니다.
-
-    {context}
-
-    Question: {question}
-    Assistant:"""
-    qa.combine_docs_chain.llm_chain.prompt = PromptTemplate.from_template(prompt_template) 
-    
-    # extract chat history
-    chats = chat_memory.load_memory_variables({})
-    chat_history_all = chats['history']
-    print('chat_history_all: ', chat_history_all)
-
-    # use last two chunks of chat history
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000,chunk_overlap=0)
-    texts = text_splitter.split_text(chat_history_all) 
-
-    pages = len(texts)
-    print('pages: ', pages)
-
-    if pages >= 2:
-        chat_history = f"{texts[pages-2]} {texts[pages-1]}"
-    elif pages == 1:
-        chat_history = texts[0]
-    else:  # 0 page
-        chat_history = ""
-    print('chat_history:\n ', chat_history)
-
-    # make a question using chat history
-    result = qa({"question": query, "chat_history": chat_history})    
-    print('result: ', result)    
-    
-    # get the reference
-    source_documents = result['source_documents']
-    print('source_documents: ', source_documents)
-
-    if len(source_documents)>=1 and enableReference == 'true':
-        reference = get_reference(source_documents)
-        #print('reference: ', reference)
-        return result['answer']+reference
-    else:
-        return result['answer']
-
 def get_answer_using_template(query, vectorstore):  
     #relevant_documents = vectorstore.similarity_search(query)
 
@@ -358,10 +285,7 @@ def lambda_handler(event, context):
         else:
 
             if querySize<1800 and enableRAG=='true': 
-                if enableConversationMode == 'true':
-                    answer = get_answer_using_template_with_history(text, vectorstore, chat_memory)
-                else:
-                    answer = get_answer_using_template(text, vectorstore)
+                answer = get_answer_using_template(text, vectorstore)
             else:
                 answer = llm(text)   
             print('answer: ', answer)

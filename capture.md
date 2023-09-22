@@ -7,7 +7,4 @@ chmod a+rx resize.sh && ./resize.sh 80
 
 4. 소스를 다운로드합니다.
 
-curl https://raw.githubusercontent.com/aws-samples/generative-ai-demo-using-amazon-sagemaker-jumpstart-kr/main/blogs/
-korean-chatbot-using-varco-llm-and-opensearch/korean-chatbot-using-varco-llm-and-opensearch.zip -o korean-chatbot-using-varco-llm-and-opensearch.zip 
-&& unzip korean-chatbot-using-varco-llm-and-opensearch.zip
-
+curl https://raw.githubusercontent.com/aws-samples/generative-ai-demo-using-amazon-sagemaker-jumpstart-kr/main/blogs/korean-chatbot-using-varco-llm-and-opensearch/korean-chatbot-using-varco-llm-and-opensearch.zip -o korean-chatbot-using-varco-llm-and-opensearch.zip && unzip korean-chatbot-using-varco-llm-and-opensearch.zip
